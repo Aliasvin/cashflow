@@ -1,5 +1,0 @@
-import type { ReactNode } from 'react';
-import { House, ArrowLeftRight, WalletCards, Target, Settings } from 'lucide-react';
-export type Page='dashboard'|'transactions'|'accounts'|'savings'|'settings';
-const items:[Page,string,any][]=[['dashboard','Dashboard',House],['transactions','Transacties',ArrowLeftRight],['accounts','Rekeningen',WalletCards],['savings','Spaardoelen',Target],['settings','Instellingen',Settings]];
-export function Layout({page,setPage,children}:{page:Page;setPage:(p:Page)=>void;children:ReactNode}){return <div className="shell"><aside><div className="brand"><div className="logo">€</div><span>Mijn geld</span></div><nav>{items.map(([id,label,Icon])=><button key={id} className={page===id?'active':''} onClick={()=>setPage(id)}><Icon size={19}/><span>{label}</span></button>)}</nav></aside><main>{children}</main><div className="mobile-nav">{items.slice(0,4).map(([id,label,Icon])=><button key={id} className={page===id?'active':''} onClick={()=>setPage(id)}><Icon size={20}/><small>{label}</small></button>)}</div></div>}
