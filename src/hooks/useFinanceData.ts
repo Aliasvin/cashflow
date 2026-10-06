@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react';
 import { defaultData } from '../data/defaultData';
 import type { FinanceData } from '../types/finance';
+import { clearPersonalCategoryRules } from '../utils/categorize';
 
 const KEY = 'mijn-geld-data';
+
+function mergeDefaultCategories(data: FinanceData): FinanceData {
+  const existingIds = new Set(data.categories.map(category => category.id));
+  const missing = defaultData.categories.filter(category => !existingIds.has(category.id));
+  return missing.length ? { ...data, categories: [...data.categories, ...missing] } : data;
+}
 
 const emptyData: FinanceData = {
   version: 1,
@@ -17,7 +24,7 @@ export function useFinanceData() {
   const [data, setData] = useState<FinanceData>(() => {
     try {
       const saved = localStorage.getItem(KEY);
-      return saved ? JSON.parse(saved) : defaultData;
+      return saved ? mergeDefaultCategories(JSON.parse(saved)) : defaultData;
     } catch {
       return defaultData;
     }
@@ -29,6 +36,7 @@ export function useFinanceData() {
 
   const reset = () => {
     localStorage.removeItem(KEY);
+    clearPersonalCategoryRules();
     setData({
       ...emptyData,
       categories: [...defaultData.categories],
