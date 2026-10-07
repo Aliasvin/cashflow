@@ -33,9 +33,11 @@ export function Recurring({data,setData}:{data:FinanceData;setData:(d:FinanceDat
  const save=(e:React.FormEvent<HTMLFormElement>)=>{
   e.preventDefault();
   const f=new FormData(e.currentTarget);
-  const needsAnchor=frequency==='biweekly'||frequency==='fourweekly'||frequency==='quarterly'||frequency==='yearly';
+  const needsAnchor=frequency==='monthly'||frequency==='biweekly'||frequency==='fourweekly'||frequency==='quarterly'||frequency==='yearly';
   const startDate=needsAnchor?String(f.get('startDate')||''):undefined;
-  const dayOfMonth=frequency==='monthly'?Number(f.get('dayOfMonth')):(startDate&&(frequency==='quarterly'||frequency==='yearly')?new Date(startDate+'T12:00:00').getDate():undefined);
+  const dayOfMonth=startDate&&(frequency==='monthly'||frequency==='quarterly'||frequency==='yearly')
+    ? new Date(startDate+'T12:00:00').getDate()
+    : undefined;
   const item:RecurringTransaction={
    id:editing?.id||crypto.randomUUID(),type,description:String(f.get('description')),amount:Number(f.get('amount')),
    frequency,startDate,dayOfMonth,dayOfWeek:['weekly','biweekly','fourweekly'].includes(frequency)?dayOfWeek:undefined,
@@ -100,7 +102,7 @@ export function Recurring({data,setData}:{data:FinanceData;setData:(d:FinanceDat
     <input name="amount" type="number" min="0.01" step="0.01" placeholder="Bedrag" defaultValue={editing?.amount||''} required/>
     <select value={frequency} onChange={e=>setFrequency(e.target.value as RecurringFrequency)}><option value="weekly">Wekelijks</option><option value="biweekly">Elke 2 weken</option><option value="fourweekly">Elke 4 weken</option><option value="monthly">Maandelijks</option><option value="quarterly">Per kwartaal</option><option value="yearly">Jaarlijks</option></select>
     {['weekly','biweekly','fourweekly'].includes(frequency)&&<label className="field-label">Dag van de week<select value={dayOfWeek} onChange={e=>setDayOfWeek(Number(e.target.value))}><option value={1}>Maandag</option><option value={2}>Dinsdag</option><option value={3}>Woensdag</option><option value={4}>Donderdag</option><option value={5}>Vrijdag</option><option value={6}>Zaterdag</option><option value={0}>Zondag</option></select></label>}
-    {frequency==='monthly'&&<label className="field-label">Dag van de maand<input name="dayOfMonth" type="number" min="1" max="31" defaultValue={editing?.dayOfMonth||1} required/></label>}
+    {frequency==='monthly'&&<label className="field-label date-field">Eerste betaaldatum<input name="startDate" type="date" defaultValue={editing?.startDate||''} required/></label>}
     {(frequency==='biweekly'||frequency==='fourweekly')&&<label className="field-label date-field">Eerste betaling<input name="startDate" type="date" defaultValue={editing?.startDate||''} required/></label>}
     {(frequency==='quarterly'||frequency==='yearly')&&<label className="field-label date-field">{frequency==='quarterly'?'Eerste betaaldatum':'Datum'}<input name="startDate" type="date" defaultValue={editing?.startDate||''} required/></label>}
     <select name="categoryId" required defaultValue={editing?.categoryId||''}><option value="" disabled>{cats.length?'Kies een categorie':`Geen categorieën voor ${type==='income'?'inkomsten':'uitgaven'}`}</option>{cats.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select>
