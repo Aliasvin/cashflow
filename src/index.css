@@ -14,7 +14,7 @@
     gap:0;
   }
   .mobile-nav button{
-    flex:1 1 20%;
+    flex:1 1 16.666%;
     min-width:0;
     padding:6px 2px;
     gap:2px;
@@ -125,3 +125,12 @@
   .month-switcher>div{min-width:0;flex:1}
   .category-chart-head{align-items:flex-start}
 }
+
+/* Planning, filters, sparen en prognose */
+.recurring-stats{grid-template-columns:minmax(260px,420px)}
+.check-line{display:flex;align-items:center;gap:8px;font-size:13px;color:#5f6864}.check-line input{width:auto}.compact{padding:7px 10px;font-size:12px}
+.transaction-filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}.transaction-filters input,.transaction-filters select{border:1px solid #dfe4e1;border-radius:10px;padding:11px;background:#fff;font:inherit;width:100%}
+.allocation{display:flex;justify-content:space-between;align-items:center;gap:20px}.allocation>div{display:flex;flex-direction:column;gap:5px}.allocation>div:last-child{text-align:right}.allocation small,.allocation span{color:#737c78;font-size:13px}.goal-card-actions{display:flex;justify-content:space-between;align-items:center}.goal-card-actions h2{margin:0}
+.spendable-value{display:block;font-size:34px;letter-spacing:-.03em;margin:18px 0}.spendable-breakdown{display:grid;gap:10px;border-top:1px solid #edf0ee;padding-top:15px}.spendable-breakdown span{display:flex;justify-content:space-between;gap:18px;color:#68716d;font-size:13px}.spendable-breakdown b{color:#26312d}
+.balance-chart{height:220px;display:flex;align-items:flex-end;gap:12px;padding-top:30px}.balance-column{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:7px;min-width:0}.balance-column i{display:block;width:min(44px,70%);background:#2d6a59;border-radius:8px 8px 3px 3px;min-height:8px}.balance-column span{font-size:10px;color:#7b827f;white-space:nowrap}.balance-column small{text-transform:capitalize;color:#737c78}
+@media(max-width:760px){.transaction-filters{grid-template-columns:1fr}.allocation{align-items:flex-start}.allocation>div:last-child{text-align:right}.spendable-value{font-size:29px}.balance-chart{height:180px;gap:6px}.balance-column span{font-size:8px}.mobile-nav small{font-size:8px}}
