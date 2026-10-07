@@ -64,16 +64,22 @@ export function Recurring({data,setData}:{data:FinanceData;setData:(d:FinanceDat
  };
 
  const recurringRow=(r:RecurringTransaction)=><div className="row recurring-row" key={r.id}>
-  <div className="recurring-main">
-   <div className="recurring-title"><b>{r.description}</b>{r.fixedCost&&<span className="badge">Vaste last</span>}{!r.active&&<span className="badge muted-badge">Gepauzeerd</span>}</div>
-   <small>{euro(r.amount)} · {frequencyLabel(r.frequency)} · {dateLabel(r)}</small>
-   <small>Per jaar {euro(monthlyEquivalent(r)*12)}</small>
+  <div className="recurring-content">
+   <div className="recurring-title">
+    <b>{r.description}</b>
+    <div className="recurring-badges">{r.fixedCost&&<span className="badge">Vaste last</span>}{!r.active&&<span className="badge muted-badge">Gepauzeerd</span>}</div>
+   </div>
+   <strong className={`recurring-amount ${r.type}`}>{r.type==='income'?'+ ':'- '}{euro(r.amount)}</strong>
+   <div className="recurring-meta">{frequencyLabel(r.frequency)} · {dateLabel(r)}</div>
+   <div className="recurring-periods">
+    <span><b>{euro(monthlyEquivalent(r))}</b> per maand</span>
+    <span><b>{euro(monthlyEquivalent(r)*12)}</b> per jaar</span>
+   </div>
   </div>
-  <div className="amount-actions">
-   <strong className={r.type}>{r.type==='income'?'+ ':'- '}{euro(r.amount)}</strong>
-   <button className="icon-button" aria-label={`${r.description} bewerken`} title="Bewerken" onClick={()=>openEdit(r)}><Pencil size={17}/></button>
-   <button className="secondary compact" onClick={()=>toggle(r.id)}>{r.active?'Pauze':'Activeer'}</button>
-   <button className="icon-button" aria-label="Verwijderen" onClick={()=>remove(r.id)}><Trash2 size={17}/></button>
+  <div className="recurring-actions">
+   <button className="recurring-action" aria-label={`${r.description} bewerken`} onClick={()=>openEdit(r)}><Pencil size={17}/><span>Bewerken</span></button>
+   <button className="recurring-action" onClick={()=>toggle(r.id)}><span className="action-pause">{r.active?'Pauze':'Activeer'}</span></button>
+   <button className="recurring-action danger-action" aria-label={`${r.description} verwijderen`} onClick={()=>remove(r.id)}><Trash2 size={17}/><span>Verwijderen</span></button>
   </div>
  </div>;
 
