@@ -200,8 +200,50 @@ html[data-theme="dark"] .recurring-text-action.danger-action{color:#d9948e}
  .recurring-minimal-actions{justify-content:flex-start;gap:20px}
 }
 
-/* iOS: datumvelden binnen de modalbreedte houden */
-.modal-form .field-label{width:100%;min-width:0;max-width:100%;overflow:hidden}
-.modal-form .date-field{min-inline-size:0}
-.modal-form .date-field input[type="date"]{box-sizing:border-box;inline-size:100%;width:100%;min-inline-size:0;min-width:0;max-inline-size:100%;max-width:100%;overflow:hidden;-webkit-appearance:none;appearance:none}
-@media(max-width:760px){.modal-form,.modal-form>*{width:100%;min-width:0;max-width:100%}.modal-panel{overflow-x:hidden}}
+/* Transacties: gegroepeerde, rustige lijst */
+.transaction-groups{display:grid;gap:18px}
+.transaction-group{padding:0;overflow:hidden}
+.transaction-group-title{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 13px;border-bottom:1px solid #edf0ee}
+.transaction-group-title h2{margin:0;font-size:18px}
+.transaction-group-title span{font-size:12px;color:#737c78;background:#f1f4f2;border-radius:999px;padding:3px 8px}
+.transaction-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:18px;padding:16px 20px;border-bottom:1px solid #edf0ee}
+.transaction-row:last-child{border-bottom:0}
+.transaction-info{display:flex;flex-direction:column;gap:3px;min-width:0}
+.transaction-info b{line-height:1.3}
+.transaction-info small{font-size:12px;color:#7d8782}
+.transaction-amount{font-size:17px;white-space:nowrap}
+.transaction-actions{display:flex;gap:10px}
+.transaction-action{border:0;background:transparent;padding:5px;color:#6f7974;font:inherit;font-size:11px;display:flex;align-items:center;gap:5px;cursor:pointer}
+.transaction-action.danger-action{color:#95504b}
+html[data-theme="dark"] .transaction-group-title,html[data-theme="dark"] .transaction-row{border-color:#2b3531}
+html[data-theme="dark"] .transaction-group-title span{background:#26302c;color:#aab3af}
+html[data-theme="dark"] .transaction-info small,html[data-theme="dark"] .transaction-action{color:#9eaaa5}
+html[data-theme="dark"] .transaction-action.danger-action{color:#d9948e}
+
+/* iOS Safari datumveld: voorkom intrinsieke breedte buiten de modal */
+.modal-form input[type="date"]{
+  -webkit-appearance:none;
+  appearance:none;
+  box-sizing:border-box!important;
+  inline-size:100%!important;
+  width:100%!important;
+  min-inline-size:0!important;
+  min-width:0!important;
+  max-inline-size:100%!important;
+  max-width:100%!important;
+}
+.modal-form input[type="date"]::-webkit-date-and-time-value{
+  text-align:left;
+  min-width:0;
+}
+.modal-panel,.modal-form{min-width:0;max-width:100%;overflow-x:hidden}
+
+@media(max-width:600px){
+ .transaction-group-title{padding:16px}
+ .transaction-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 12px;padding:16px}
+ .transaction-info{grid-column:1}
+ .transaction-amount{grid-column:2;grid-row:1;font-size:17px}
+ .transaction-actions{grid-column:1 / -1;margin-top:9px;padding-top:10px;border-top:1px solid #edf0ee;gap:20px}
+ .transaction-action{padding:0}
+ html[data-theme="dark"] .transaction-actions{border-color:#2b3531}
+}
