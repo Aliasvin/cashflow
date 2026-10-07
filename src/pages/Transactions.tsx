@@ -87,7 +87,14 @@ export function Transactions({ data, setData }: { data: FinanceData; setData: (d
 
   const edit = (t: Transaction) => { setEditingId(t.id); setType(t.type); setDescription(t.description); setCategoryId(t.categoryId ?? ''); setAutoCategory(false); setOpen(true); };
   const closeModal=()=>{setOpen(false);setEditingId(null);setDescription('');setCategoryId('');setAutoCategory(false);setRemember(true);setType('expense')};
-  const filtered = useMemo(() => data.transactions.filter(t => { const q=query.toLowerCase().trim(); return (!q || t.description.toLowerCase().includes(q)) && (filterType==='all' || t.type===filterType) && (filterCategory==='all' || t.categoryId===filterCategory); }), [data.transactions,query,filterType,filterCategory]);
+  const filtered = useMemo(() => data.transactions
+    .filter(t => { const q=query.toLowerCase().trim(); return (!q || t.description.toLowerCase().includes(q)) && (filterType==='all' || t.type===filterType) && (filterCategory==='all' || t.categoryId===filterCategory); })
+    .sort((a,b) => a.date.localeCompare(b.date)), [data.transactions,query,filterType,filterCategory]);
+  const grouped = [
+    { key:'income', title:'Inkomsten', items:filtered.filter(t=>t.type==='income') },
+    { key:'expense', title:'Uitgaven', items:filtered.filter(t=>t.type==='expense') },
+    { key:'transfer', title:'Overboekingen', items:filtered.filter(t=>t.type==='transfer') },
+  ].filter(group=>group.items.length);
 
   return (
     <>
@@ -174,32 +181,31 @@ export function Transactions({ data, setData }: { data: FinanceData; setData: (d
 
       <div className="transaction-filters card"><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Zoek op omschrijving"/><select value={filterType} onChange={e=>setFilterType(e.target.value)}><option value="all">Alle types</option><option value="expense">Uitgaven</option><option value="income">Inkomsten</option><option value="transfer">Overboekingen</option></select><select value={filterCategory} onChange={e=>setFilterCategory(e.target.value)}><option value="all">Alle categorieën</option>{data.categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
 
-      <section className="card">
+      <div className="transaction-groups">
         {filtered.length === 0 ? (
-          <div className="empty">Nog geen transacties. Voeg je eerste transactie toe.</div>
-        ) : filtered.map(t => {
-          const category = data.categories.find(c => c.id === t.categoryId);
-          return (
-            <div className="row" key={t.id}>
-              <div>
-                <b>{t.description}</b>
-                <small>
-                  {new Date(t.date + 'T12:00:00').toLocaleDateString('nl-NL')}
-                  {category ? ` · ${category.name}` : ''}
-                </small>
-              </div>
-              <div className="amount-actions">
-                <strong className={t.type}>
-                  {t.type === 'income' ? '+ ' : t.type === 'expense' ? '- ' : ''}{euro(t.amount)}
-                </strong>
-                <button className="icon-button" onClick={() => edit(t)} aria-label="Bewerken"><Pencil size={17}/></button><button className="icon-button" onClick={() => del(t.id)} aria-label="Verwijderen">
-                  <Trash2 size={17} />
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </section>
+          <section className="card"><div className="empty">Nog geen transacties. Voeg je eerste transactie toe.</div></section>
+        ) : grouped.map(group => (
+          <section className="card transaction-group" key={group.key}>
+            <div className="transaction-group-title"><h2>{group.title}</h2><span>{group.items.length}</span></div>
+            {group.items.map(t => {
+              const category = data.categories.find(c => c.id === t.categoryId);
+              return (
+                <div className="transaction-row" key={t.id}>
+                  <div className="transaction-info">
+                    <b>{t.description}</b>
+                    <small>{new Date(t.date + 'T12:00:00').toLocaleDateString('nl-NL')}{category ? ` · ${category.name}` : ''}</small>
+                  </div>
+                  <strong className={`transaction-amount ${t.type}`}>{t.type === 'income' ? '+ ' : t.type === 'expense' ? '- ' : ''}{euro(t.amount)}</strong>
+                  <div className="transaction-actions">
+                    <button className="transaction-action" onClick={() => edit(t)}><Pencil size={15}/><span>Bewerken</span></button>
+                    <button className="transaction-action danger-action" onClick={() => del(t.id)}><Trash2 size={15}/><span>Verwijderen</span></button>
+                  </div>
+                </div>
+              );
+            })}
+          </section>
+        ))}
+      </div>
     </>
   );
 }
