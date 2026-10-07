@@ -3,6 +3,7 @@ import { Plus, Trash2, Sparkles, Pencil } from 'lucide-react';
 import type { FinanceData, Transaction } from '../types/finance';
 import { euro } from '../utils/finance';
 import { rememberCategory, suggestCategory } from '../utils/categorize';
+import { Modal } from '../components/ui/Modal';
 
 export function Transactions({ data, setData }: { data: FinanceData; setData: (d: FinanceData) => void }) {
   const [open, setOpen] = useState(false);
@@ -84,7 +85,8 @@ export function Transactions({ data, setData }: { data: FinanceData; setData: (d
   const del = (id: string) =>
     setData({ ...data, transactions: data.transactions.filter(t => t.id !== id) });
 
-  const edit = (t: Transaction) => { setEditingId(t.id); setType(t.type); setDescription(t.description); setCategoryId(t.categoryId ?? ''); setAutoCategory(false); setOpen(true); window.scrollTo({top:0,behavior:'smooth'}); };
+  const edit = (t: Transaction) => { setEditingId(t.id); setType(t.type); setDescription(t.description); setCategoryId(t.categoryId ?? ''); setAutoCategory(false); setOpen(true); };
+  const closeModal=()=>{setOpen(false);setEditingId(null);setDescription('');setCategoryId('');setAutoCategory(false);setRemember(true);setType('expense')};
   const filtered = useMemo(() => data.transactions.filter(t => { const q=query.toLowerCase().trim(); return (!q || t.description.toLowerCase().includes(q)) && (filterType==='all' || t.type===filterType) && (filterCategory==='all' || t.categoryId===filterCategory); }), [data.transactions,query,filterType,filterCategory]);
 
   return (
@@ -95,13 +97,13 @@ export function Transactions({ data, setData }: { data: FinanceData; setData: (d
           <h1>Transacties</h1>
           <p className="muted">Voeg inkomsten, uitgaven en overboekingen toe.</p>
         </div>
-        <button className="primary" onClick={() => { setOpen(!open); if(open){setEditingId(null);setDescription('');setCategoryId('');} }}>
+        <button className="primary" onClick={() => { if(open) closeModal(); else setOpen(true); }}>
           <Plus size={18} />{editingId ? 'Annuleren' : 'Transactie'}
         </button>
       </header>
 
-      {open && (
-        <form className="card form" onSubmit={add}>
+      <Modal open={open} title={editingId?'Transactie bewerken':'Transactie toevoegen'} onClose={closeModal}>
+        <form className="form modal-form" onSubmit={add}>
           <select name="type" value={type} onChange={e => changeType(e.target.value as Transaction['type'])}>
             <option value="expense">Uitgave</option>
             <option value="income">Inkomst</option>
@@ -168,7 +170,7 @@ export function Transactions({ data, setData }: { data: FinanceData; setData: (d
 
           <button className="primary" type="submit">{editingId ? 'Wijzigingen opslaan' : 'Opslaan'}</button>
         </form>
-      )}
+      </Modal>
 
       <div className="transaction-filters card"><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Zoek op omschrijving"/><select value={filterType} onChange={e=>setFilterType(e.target.value)}><option value="all">Alle types</option><option value="expense">Uitgaven</option><option value="income">Inkomsten</option><option value="transfer">Overboekingen</option></select><select value={filterCategory} onChange={e=>setFilterCategory(e.target.value)}><option value="all">Alle categorieën</option>{data.categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
 

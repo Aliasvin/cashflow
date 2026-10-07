@@ -3,6 +3,7 @@ import { ArrowDownRight, ArrowUpRight, Plus, Trash2, TrendingUp } from 'lucide-r
 import type { FinanceData, RecurringFrequency, RecurringTransaction } from '../types/finance';
 import { euro } from '../utils/finance';
 import { frequencyLabel, monthlyEquivalent } from '../utils/planning';
+import { Modal } from '../components/ui/Modal';
 
 export function Recurring({data,setData}:{data:FinanceData;setData:(d:FinanceData)=>void}){
  const [open,setOpen]=useState(false),[type,setType]=useState<'income'|'expense'>('expense'),[frequency,setFrequency]=useState<RecurringFrequency>('monthly');
@@ -45,7 +46,7 @@ export function Recurring({data,setData}:{data:FinanceData;setData:(d:FinanceDat
   <div className="recurring-main">
    <div className="recurring-title"><b>{r.description}</b>{r.fixedCost&&<span className="badge">Vaste last</span>}{!r.active&&<span className="badge muted-badge">Gepauzeerd</span>}</div>
    <small>{euro(r.amount)} · {frequencyLabel(r.frequency)} · {dateLabel(r)}</small>
-   <small>Gemiddeld {euro(monthlyEquivalent(r))} per maand</small>
+   <small>Per jaar {euro(monthlyEquivalent(r)*12)}</small>
   </div>
   <div className="amount-actions">
    <strong className={r.type}>{r.type==='income'?'+ ':'- '}{euro(r.amount)}</strong>
@@ -63,7 +64,7 @@ export function Recurring({data,setData}:{data:FinanceData;setData:(d:FinanceDat
    <article><div className="icon"><TrendingUp/></div><span>Verschil</span><b className={difference>=0?'income':'expense'}>{difference>=0?'+ ':''}{euro(difference)}</b><small>{difference>=0?'+ ':''}{euro(difference*12)} per jaar</small></article>
   </div>
 
-  {open&&<form className="card form" onSubmit={add}>
+  <Modal open={open} title="Terugkerende transactie toevoegen" onClose={()=>setOpen(false)}><form className="form modal-form" onSubmit={add}>
    <select value={type} onChange={e=>setType(e.target.value as 'income'|'expense')}><option value="expense">Uitgave</option><option value="income">Inkomst</option></select>
    <input name="description" placeholder="Omschrijving" required/>
    <input name="amount" type="number" min="0.01" step="0.01" placeholder="Bedrag" required/>
@@ -73,7 +74,7 @@ export function Recurring({data,setData}:{data:FinanceData;setData:(d:FinanceDat
    <select name="accountId" required defaultValue=""><option value="" disabled>{data.accounts.length?'Kies een rekening':'Maak eerst een rekening aan'}</option>{data.accounts.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
    {type==='expense'&&<label className="check-line"><input type="checkbox" name="fixedCost"/> Dit is een vaste last</label>}
    <button className="primary">Opslaan</button>
-  </form>}
+  </form></Modal>
 
   <div className="recurring-sections">
    <section className="card recurring-section">
