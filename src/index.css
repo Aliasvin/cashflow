@@ -199,3 +199,9 @@ html[data-theme="dark"] .recurring-text-action.danger-action{color:#d9948e}
  .recurring-minimal-amount{font-size:18px}
  .recurring-minimal-actions{justify-content:flex-start;gap:20px}
 }
+
+/* iOS: datumvelden binnen de modalbreedte houden */
+.modal-form .field-label{width:100%;min-width:0;max-width:100%;overflow:hidden}
+.modal-form .date-field{min-inline-size:0}
+.modal-form .date-field input[type="date"]{box-sizing:border-box;inline-size:100%;width:100%;min-inline-size:0;min-width:0;max-inline-size:100%;max-width:100%;overflow:hidden;-webkit-appearance:none;appearance:none}
+@media(max-width:760px){.modal-form,.modal-form>*{width:100%;min-width:0;max-width:100%}.modal-panel{overflow-x:hidden}}
