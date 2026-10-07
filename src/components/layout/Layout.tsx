@@ -1,12 +1,13 @@
 import type { ReactNode } from 'react';
-import { House, ArrowLeftRight, WalletCards, Target, MoreHorizontal } from 'lucide-react';
+import { House, ArrowLeftRight, WalletCards, Target, MoreHorizontal, Repeat2 } from 'lucide-react';
 
-export type Page = 'dashboard' | 'transactions' | 'accounts' | 'savings' | 'settings';
+export type Page = 'dashboard' | 'transactions' | 'accounts' | 'recurring' | 'savings' | 'settings';
 
 const desktopItems: [Page, string, any][] = [
   ['dashboard', 'Dashboard', House],
   ['transactions', 'Transacties', ArrowLeftRight],
   ['accounts', 'Rekeningen', WalletCards],
+  ['recurring', 'Terugkerend', Repeat2],
   ['savings', 'Spaardoelen', Target],
   ['settings', 'Instellingen', MoreHorizontal],
 ];
@@ -15,6 +16,7 @@ const mobileItems: [Page, string, any][] = [
   ['dashboard', 'Dashboard', House],
   ['transactions', 'Transacties', ArrowLeftRight],
   ['accounts', 'Rekeningen', WalletCards],
+  ['recurring', 'Terugkerend', Repeat2],
   ['savings', 'Spaardoelen', Target],
   ['settings', 'Meer', MoreHorizontal],
 ];
