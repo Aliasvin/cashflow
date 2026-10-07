@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Plus, Trash2, Sparkles, Pencil } from 'lucide-react';
+import { Plus, Trash2, Sparkles, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { FinanceData, Transaction } from '../types/finance';
 import { euro } from '../utils/finance';
 import { rememberCategory, suggestCategory } from '../utils/categorize';
@@ -16,6 +16,18 @@ export function Transactions({ data, setData }: { data: FinanceData; setData: (d
   const [filterType, setFilterType] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState(() => new Date().toISOString().slice(0, 7));
+
+  const changeMonth = (offset: number) => {
+    const [year, month] = selectedMonth.split('-').map(Number);
+    const next = new Date(year, month - 1 + offset, 1);
+    setSelectedMonth(`${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`);
+  };
+
+  const monthLabel = new Date(`${selectedMonth}-01T12:00:00`).toLocaleDateString('nl-NL', {
+    month: 'long',
+    year: 'numeric',
+  });
 
   const expenseCategories = data.categories.filter(c => c.type === 'expense');
   const incomeCategories = data.categories.filter(c => c.type === 'income');
@@ -90,11 +102,12 @@ export function Transactions({ data, setData }: { data: FinanceData; setData: (d
   const filtered = useMemo(() => data.transactions
     .filter(t => {
       const q=query.toLowerCase().trim();
-      return (!q || t.description.toLowerCase().includes(q))
+      return t.date.startsWith(selectedMonth)
+        && (!q || t.description.toLowerCase().includes(q))
         && (filterType==='all' || t.type===filterType)
         && (filterCategory==='all' || t.categoryId===filterCategory);
     })
-    .sort((a,b) => b.date.localeCompare(a.date)), [data.transactions,query,filterType,filterCategory]);
+    .sort((a,b) => b.date.localeCompare(a.date)), [data.transactions,query,filterType,filterCategory,selectedMonth]);
 
   const grouped = [
     { key: 'income', title: 'Inkomsten', items: filtered.filter(t => t.type === 'income') },
@@ -188,12 +201,25 @@ export function Transactions({ data, setData }: { data: FinanceData; setData: (d
         </form>
       </Modal>
 
+      <div className="month-switcher transaction-month-switcher">
+        <button className="month-button" type="button" onClick={() => changeMonth(-1)} aria-label="Vorige maand">
+          <ChevronLeft size={18}/>
+        </button>
+        <div>
+          <small>Transacties van</small>
+          <strong>{monthLabel}</strong>
+        </div>
+        <button className="month-button" type="button" onClick={() => changeMonth(1)} aria-label="Volgende maand">
+          <ChevronRight size={18}/>
+        </button>
+      </div>
+
       <div className="transaction-filters card"><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Zoek op omschrijving"/><select value={filterType} onChange={e=>setFilterType(e.target.value)}><option value="all">Alle types</option><option value="expense">Uitgaven</option><option value="income">Inkomsten</option><option value="transfer">Overboekingen</option></select><select value={filterCategory} onChange={e=>setFilterCategory(e.target.value)}><option value="all">Alle categorieën</option>{data.categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
 
       <div className="transaction-groups">
         {filtered.length === 0 ? (
           <section className="card">
-            <div className="empty">Nog geen transacties. Voeg je eerste transactie toe.</div>
+            <div className="empty">Geen transacties in {monthLabel}.</div>
           </section>
         ) : grouped.map(group => (
           <section className="card transaction-group" key={group.key}>
