@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import type { FinanceData } from '../types/finance';
 import { accountBalance, euro } from '../utils/finance';
-import { dueRecurring, spendable, upcoming } from '../utils/planning';
+import { dueRecurring, spendable, upcoming, nextIncomeSpendable, projectedBalance, monthCalendar, monthlyEquivalent } from '../utils/planning';
 
 function currentMonthKey() {
   const now = new Date();
@@ -79,6 +79,34 @@ export function Dashboard({ data, setData }: { data: FinanceData; setData: (data
 
   const maxCategoryAmount = categoryExpenses[0]?.amount ?? 0;
   const free = spendable(data);
+  const untilIncome = nextIncomeSpendable(data);
+  const projection = projectedBalance(data,45);
+  const calendar = monthCalendar(data,selectedMonth);
+  const fixedCosts = data.recurringTransactions
+    .filter(r=>r.active && r.type==='expense' && r.fixedCost)
+    .map(r=>({...r,monthly:monthlyEquivalent(r)}))
+    .sort((a,b)=>b.monthly-a.monthly);
+  const fixedMonthly = fixedCosts.reduce((s,r)=>s+r.monthly,0);
+  const recurringIncomeMonthly = data.recurringTransactions
+    .filter(r=>r.active && r.type==='income')
+    .reduce((s,r)=>s+monthlyEquivalent(r),0);
+  const fixedShare = recurringIncomeMonthly>0 ? fixedMonthly/recurringIncomeMonthly*100 : 0;
+
+  const insightMonths = Array.from({length:6},(_,i)=>{
+    const now=new Date();
+    const date=new Date(now.getFullYear(),now.getMonth()-5+i,1);
+    const key=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
+    const tx=data.transactions.filter(t=>t.date.startsWith(key));
+    const inc=tx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+    const exp=tx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    return {key,label:new Intl.DateTimeFormat('nl-NL',{month:'short'}).format(date),income:inc,expenses:exp,saved:inc-exp};
+  });
+  const monthsWithExpenses=insightMonths.filter(m=>m.expenses>0);
+  const avgExpenses=monthsWithExpenses.length?monthsWithExpenses.reduce((s,m)=>s+m.expenses,0)/monthsWithExpenses.length:0;
+  const avgIncome=insightMonths.filter(m=>m.income>0).length
+    ? insightMonths.filter(m=>m.income>0).reduce((s,m)=>s+m.income,0)/insightMonths.filter(m=>m.income>0).length:0;
+  const savingsRate=avgIncome>0?Math.max(0,(avgIncome-avgExpenses)/avgIncome*100):0;
+  const largestExpense=[...data.transactions].filter(t=>t.type==='expense').sort((a,b)=>b.amount-a.amount)[0];
   const forecast = upcoming(data, 45).slice(0, 8);
   const due=dueRecurring(data,31).slice(0,8);
   const processRecurring=(entry:(typeof due)[number])=>{const d=entry.date;const date=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;setData({...data,transactions:[{id:crypto.randomUUID(),type:entry.item.type,amount:entry.item.amount,description:entry.item.description,date,accountId:entry.item.accountId,categoryId:entry.item.categoryId},...data.transactions],processedRecurringOccurrences:[...(data.processedRecurringOccurrences??[]),entry.key]})};
@@ -150,11 +178,66 @@ export function Dashboard({ data, setData }: { data: FinanceData; setData: (data
         <div className="spendable-breakdown"><span>Beschikbaar op betaal- en contante rekeningen <b>{euro(free.checking)}</b></span><span>Verwachte inkomsten <b className="income">+ {euro(free.incoming)}</b></span><span>Nog te betalen <b className="expense">- {euro(free.outgoing)}</b></span></div>
       </section>
 
+      <section className="card until-income-card">
+        <div className="section-title"><div><h2>Tot je volgende inkomen</h2><p>{untilIncome.nextIncome?`Tot ${untilIncome.nextIncome.toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'})}`:'Geen volgend terugkerend inkomen gevonden'}</p></div><CalendarClock size={20}/></div>
+        <strong className={untilIncome.value>=0?'spendable-value':'spendable-value expense'}>{euro(untilIncome.value)}</strong>
+        {untilIncome.nextIncome&&<div className="spendable-breakdown">
+          <span>Huidig beschikbaar <b>{euro(untilIncome.checking)}</b></span>
+          <span>Nog te betalen vóór inkomen <b className="expense">- {euro(untilIncome.outgoing)}</b></span>
+          <span>Richtbedrag per dag <b>{euro(untilIncome.daily)}</b></span>
+        </div>}
+      </section>
+
       <section className="card"><div className="section-title"><div><h2>Saldoontwikkeling</h2><p>Laatste 6 maanden</p></div><TrendingUp size={20}/></div><div className="balance-chart">{balancePoints.map(p=>{const range=maxBalance-minBalance||1;const h=22+((p.value-minBalance)/range)*78;return <div className="balance-column" key={p.label}><span>{euro(p.value)}</span><i style={{height:`${h}%`}}/><small>{p.label}</small></div>})}</div></section>
 
       {due.length>0&&<section className="card due-card"><div className="section-title"><div><h2>Te verwerken</h2><p>Verwachte transacties die inmiddels zijn gepland</p></div><CalendarClock size={20}/></div>{due.map(entry=><div className="due-row" key={entry.key}><div><b>{entry.item.description}</b><small>{entry.date.toLocaleDateString('nl-NL')} · {entry.item.type==='income'?'+ ':'- '}{euro(entry.item.amount)}</small></div><div className="due-actions"><button className="primary compact" onClick={()=>processRecurring(entry)}>Toevoegen</button><button className="secondary compact" onClick={()=>skipRecurring(entry.key)}>Overslaan</button></div></div>)}</section>}
 
       <section className="card"><div className="section-title"><div><h2>Verwachte transacties</h2><p>Komende 45 dagen</p></div><CalendarClock size={20}/></div>{forecast.length===0?<div className="empty">Voeg terugkerende transacties toe om vooruit te kijken.</div>:forecast.map(({item,date})=><div className="row" key={item.id}><div><b>{item.description}</b><small>{date.toLocaleDateString('nl-NL',{day:'numeric',month:'short'})}</small></div><strong className={item.type}>{item.type==='income'?'+ ':'- '}{euro(item.amount)}</strong></div>)}</section>
+
+
+      <section className="card financial-calendar">
+        <div className="section-title"><div><h2>Financiële kalender</h2><p>{monthLabel(selectedMonth)} · werkelijk en verwacht</p></div><CalendarClock size={20}/></div>
+        {calendar.length===0?<div className="empty">Geen transacties of geplande betalingen in deze maand.</div>:
+          <div className="calendar-list">{calendar.map(item=><div className="calendar-row" key={`${item.kind}-${item.id}`}>
+            <div className="calendar-date"><b>{item.date.getDate()}</b><small>{item.date.toLocaleDateString('nl-NL',{weekday:'short'})}</small></div>
+            <div className="calendar-info"><b>{item.description}</b><small><span className={`calendar-status ${item.kind}`}>{item.kind==='actual'?'Werkelijk':'Verwacht'}</span></small></div>
+            <strong className={item.type}>{item.type==='income'?'+ ':item.type==='expense'?'- ':''}{euro(item.amount)}</strong>
+          </div>)}</div>}
+      </section>
+
+      <section className="card forecast-card">
+        <div className="section-title"><div><h2>Saldo-prognose</h2><p>Verwacht verloop van je betaal- en contante saldo, komende 45 dagen</p></div><TrendingUp size={20}/></div>
+        <div className="forecast-summary"><span>Nu <b>{euro(projection[0]?.balance??0)}</b></span><span>Na planning <b>{euro(projection.at(-1)?.balance??0)}</b></span></div>
+        <div className="forecast-timeline">
+          {projection.slice(0,12).map((point,i)=><div className="forecast-row" key={`${+point.date}-${i}`}>
+            <div><b>{point.label}</b><small>{point.date.toLocaleDateString('nl-NL',{day:'numeric',month:'short'})}</small></div>
+            <strong className={point.balance<0?'expense':''}>{euro(point.balance)}</strong>
+          </div>)}
+        </div>
+      </section>
+
+      <section className="card fixed-costs-card">
+        <div className="section-title"><div><h2>Vaste lasten</h2><p>Je structurele uitgaven</p></div><ArrowDownRight size={20}/></div>
+        <div className="fixed-cost-summary">
+          <span><small>Per maand</small><b>{euro(fixedMonthly)}</b></span>
+          <span><small>Per jaar</small><b>{euro(fixedMonthly*12)}</b></span>
+          <span><small>Van gemiddeld inkomen</small><b>{Math.round(fixedShare)}%</b></span>
+        </div>
+        {fixedCosts.length===0?<div className="empty">Markeer terugkerende uitgaven als vaste last om dit overzicht te vullen.</div>:
+          fixedCosts.slice(0,8).map(item=><div className="row fixed-cost-row" key={item.id}><div><b>{item.description}</b><small>{Math.round(fixedMonthly?item.monthly/fixedMonthly*100:0)}% van je vaste lasten</small></div><strong>{euro(item.monthly)} p/m</strong></div>)}
+      </section>
+
+      <section className="card insights-card">
+        <div className="section-title"><div><h2>Inzichten</h2><p>Gebaseerd op de laatste 6 maanden</p></div><TrendingUp size={20}/></div>
+        <div className="insight-grid">
+          <span><small>Gemiddelde uitgaven</small><b>{euro(avgExpenses)}</b><em>per maand</em></span>
+          <span><small>Gemiddelde inkomsten</small><b>{euro(avgIncome)}</b><em>per maand</em></span>
+          <span><small>Gemiddeld over</small><b>{euro(avgIncome-avgExpenses)}</b><em>per maand</em></span>
+          <span><small>Spaarpercentage</small><b>{Math.round(savingsRate)}%</b><em>van gemiddeld inkomen</em></span>
+        </div>
+        {largestExpense&&<div className="insight-highlight"><span>Grootste uitgave</span><b>{largestExpense.description}</b><strong>{euro(largestExpense.amount)}</strong></div>}
+        <div className="insight-months">{insightMonths.map(m=><div key={m.key}><small>{m.label}</small><i style={{height:`${Math.max(6,Math.min(100,avgExpenses?m.expenses/Math.max(...insightMonths.map(x=>x.expenses),1)*100:6))}%`}}/><span>{euro(m.expenses)}</span></div>)}</div>
+      </section>
 
       <section className="card category-overview">
         <div className="section-title">
