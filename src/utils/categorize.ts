@@ -16,7 +16,7 @@ const RULES: Array<{ keywords: string[]; categoryId: string }> = [
 
 const PERSONAL_RULES_KEY = 'cashflow-category-rules';
 
-type PersonalRule = { keyword: string; categoryId: string };
+export type PersonalRule = { keyword: string; categoryId: string };
 
 function normalize(value: string) {
   return value.toLocaleLowerCase('nl-NL').trim();
@@ -42,6 +42,11 @@ export function rememberCategory(description: string, categoryId: string) {
 
 export function clearPersonalCategoryRules() {
   localStorage.removeItem(PERSONAL_RULES_KEY);
+}
+
+export function deletePersonalRule(keyword: string) {
+  const rules = getPersonalRules().filter(rule => normalize(rule.keyword) !== normalize(keyword));
+  localStorage.setItem(PERSONAL_RULES_KEY, JSON.stringify(rules));
 }
 
 export function suggestCategory(description: string, categories: Category[]) {
