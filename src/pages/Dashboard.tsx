@@ -7,9 +7,12 @@ import {
   Landmark,
   PiggyBank,
   Tag,
+  CalendarClock,
+  TrendingUp,
 } from 'lucide-react';
 import type { FinanceData } from '../types/finance';
 import { accountBalance, euro } from '../utils/finance';
+import { spendable, upcoming } from '../utils/planning';
 
 function currentMonthKey() {
   const now = new Date();
@@ -68,6 +71,10 @@ export function Dashboard({ data }: { data: FinanceData }) {
     .sort((a, b) => b.amount - a.amount);
 
   const maxCategoryAmount = categoryExpenses[0]?.amount ?? 0;
+  const free = spendable(data);
+  const forecast = upcoming(data, 45).slice(0, 8);
+  const balancePoints = (() => { const now=new Date(); return Array.from({length:6},(_,i)=>{const d=new Date(now.getFullYear(),now.getMonth()-5+i,1);const end=new Date(d.getFullYear(),d.getMonth()+1,0);let value=data.accounts.reduce((sum,a)=>sum+a.startingBalance,0);data.transactions.filter(t=>new Date(t.date+'T12:00:00')<=end).forEach(t=>{if(t.type==='income')value+=t.amount;if(t.type==='expense')value-=t.amount;});return {label:new Intl.DateTimeFormat('nl-NL',{month:'short'}).format(d),value};});})();
+  const minBalance=Math.min(...balancePoints.map(p=>p.value)); const maxBalance=Math.max(...balancePoints.map(p=>p.value));
 
   return (
     <>
@@ -121,6 +128,17 @@ export function Dashboard({ data }: { data: FinanceData }) {
           <b>{euro(income - expenses)}</b>
         </article>
       </div>
+
+
+      <section className="card spendable-card">
+        <div className="section-title"><div><h2>Vrij te besteden</h2><p>Komende 31 dagen op basis van je planning</p></div><CalendarClock size={20}/></div>
+        <strong className="spendable-value">{euro(free.value)}</strong>
+        <div className="spendable-breakdown"><span>Beschikbaar op betaal- en contante rekeningen <b>{euro(free.checking)}</b></span><span>Verwachte inkomsten <b className="income">+ {euro(free.incoming)}</b></span><span>Nog te betalen <b className="expense">- {euro(free.outgoing)}</b></span></div>
+      </section>
+
+      <section className="card"><div className="section-title"><div><h2>Saldoontwikkeling</h2><p>Laatste 6 maanden</p></div><TrendingUp size={20}/></div><div className="balance-chart">{balancePoints.map(p=>{const range=maxBalance-minBalance||1;const h=22+((p.value-minBalance)/range)*78;return <div className="balance-column" key={p.label}><span>{euro(p.value)}</span><i style={{height:`${h}%`}}/><small>{p.label}</small></div>})}</div></section>
+
+      <section className="card"><div className="section-title"><div><h2>Verwachte transacties</h2><p>Komende 45 dagen</p></div><CalendarClock size={20}/></div>{forecast.length===0?<div className="empty">Voeg terugkerende transacties toe om vooruit te kijken.</div>:forecast.map(({item,date})=><div className="row" key={item.id}><div><b>{item.description}</b><small>{date.toLocaleDateString('nl-NL',{day:'numeric',month:'short'})}</small></div><strong className={item.type}>{item.type==='income'?'+ ':'- '}{euro(item.amount)}</strong></div>)}</section>
 
       <section className="card category-overview">
         <div className="section-title">
