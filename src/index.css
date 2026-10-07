@@ -173,3 +173,43 @@ html[data-theme="dark"] .modal-panel{background:#18201d;border-color:#34413c}htm
 .modal-form>*{
   min-width:0;
 }
+
+
+/* Rustigere layout voor terugkerende transacties */
+.recurring-row{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.recurring-content{display:grid;grid-template-columns:minmax(180px,1fr) auto;gap:5px 24px;align-items:center;min-width:0;flex:1}
+.recurring-title{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+.recurring-title>b{font-size:16px}
+.recurring-badges{display:flex;gap:6px;flex-wrap:wrap}
+.recurring-amount{grid-column:2;grid-row:1;font-size:17px;white-space:nowrap}
+.recurring-meta{grid-column:1;color:#7d8782;font-size:13px}
+.recurring-periods{grid-column:1 / -1;display:flex;gap:18px;color:#7d8782;font-size:12px;flex-wrap:wrap}
+.recurring-periods b{color:inherit}
+.recurring-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.recurring-action{border:0;background:transparent;color:#6f7974;border-radius:9px;padding:8px;display:flex;align-items:center;gap:6px;font:inherit;font-size:12px;cursor:pointer}
+.recurring-action:hover{background:#f0f3f1}
+.recurring-action .action-pause{font-weight:700;color:#2f3935}
+.danger-action{color:#8f5652}
+html[data-theme="dark"] .recurring-meta,html[data-theme="dark"] .recurring-periods{color:#9eaaa5}
+html[data-theme="dark"] .recurring-action{color:#a5afaa}
+html[data-theme="dark"] .recurring-action:hover{background:#222c28}
+html[data-theme="dark"] .recurring-action .action-pause{color:#e5ece9}
+html[data-theme="dark"] .danger-action{color:#d9948e}
+
+@media(max-width:600px){
+ .recurring-row{display:block;padding:20px}
+ .recurring-content{display:block}
+ .recurring-title{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+ .recurring-title>b{font-size:18px;line-height:1.25;max-width:72%}
+ .recurring-badges{justify-content:flex-end}
+ .recurring-amount{display:block;font-size:22px;margin-bottom:4px}
+ .recurring-meta{font-size:14px;margin-bottom:14px}
+ .recurring-periods{display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid #e8ecea;padding-top:12px;font-size:13px}
+ .recurring-periods span{display:flex;flex-direction:column;gap:2px}
+ .recurring-periods b{font-size:15px;color:#26312d}
+ .recurring-actions{margin-top:14px;padding-top:10px;border-top:1px solid #e8ecea;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+ .recurring-action{justify-content:center;padding:9px 4px;font-size:11px}
+ .recurring-action .action-pause{font-size:11px}
+ html[data-theme="dark"] .recurring-periods,html[data-theme="dark"] .recurring-actions{border-color:#2b3531}
+ html[data-theme="dark"] .recurring-periods b{color:#edf3f0}
+}
