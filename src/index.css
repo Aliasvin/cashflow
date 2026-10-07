@@ -461,3 +461,42 @@ html[data-theme="dark"] .month-summary-grid>span,html[data-theme="dark"] .accoun
     margin-bottom:14px;
   }
 }
+
+
+/* Financiële planning en inzichten */
+.until-income-card .spendable-value{display:block;margin:6px 0 16px}
+.calendar-list{display:grid}
+.calendar-row{display:grid;grid-template-columns:46px minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #edf0ee}
+.calendar-row:first-child{border-top:0}
+.calendar-date{width:42px;height:42px;border-radius:11px;background:#f2f5f3;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.calendar-date b{font-size:16px}.calendar-date small{font-size:10px;text-transform:uppercase;color:#7d8782;margin-top:3px}
+.calendar-info{display:flex;flex-direction:column;gap:4px;min-width:0}.calendar-info>b{overflow-wrap:anywhere}
+.calendar-status{font-size:10px;font-weight:700;border-radius:999px;padding:3px 7px;background:#eef1ef;color:#6f7974}
+.calendar-status.expected{background:#fff3dc;color:#8a6426}.calendar-status.actual{background:#e8f3ee;color:#326a56}
+.forecast-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.forecast-summary span,.fixed-cost-summary span,.insight-grid span{display:flex;flex-direction:column;gap:4px;padding:13px;border-radius:12px;background:#f5f7f6}
+.forecast-summary b{font-size:18px}
+.forecast-timeline{display:grid}.forecast-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #edf0ee}
+.forecast-row>div{display:flex;flex-direction:column;gap:2px}.forecast-row small{color:#7d8782}
+.fixed-cost-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.fixed-cost-summary small,.insight-grid small{color:#7d8782}.fixed-cost-summary b{font-size:18px}
+.fixed-cost-row strong{white-space:nowrap}
+.insight-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.insight-grid b{font-size:18px}.insight-grid em{font-style:normal;font-size:10px;color:#7d8782}
+.insight-highlight{display:grid;grid-template-columns:1fr auto;gap:3px 12px;align-items:center;margin-top:14px;padding:14px;border-radius:12px;background:#f5f7f6}
+.insight-highlight span{grid-column:1/-1;font-size:11px;color:#7d8782}.insight-highlight strong{white-space:nowrap}
+.insight-months{height:150px;display:flex;align-items:end;gap:8px;margin-top:18px;padding-top:12px;border-top:1px solid #edf0ee}
+.insight-months>div{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;min-width:0}
+.insight-months i{display:block;width:min(28px,70%);min-height:6px;background:#5f8f7e;border-radius:7px 7px 3px 3px}
+.insight-months small{text-transform:capitalize;color:#7d8782}.insight-months span{font-size:9px;color:#7d8782;white-space:nowrap}
+html[data-theme="dark"] .calendar-row,html[data-theme="dark"] .forecast-row,html[data-theme="dark"] .insight-months{border-color:#2b3531}
+html[data-theme="dark"] .calendar-date,html[data-theme="dark"] .forecast-summary span,html[data-theme="dark"] .fixed-cost-summary span,html[data-theme="dark"] .insight-grid span,html[data-theme="dark"] .insight-highlight{background:#1d2924}
+html[data-theme="dark"] .calendar-status.actual{background:#213b31;color:#9dd0bd}
+html[data-theme="dark"] .calendar-status.expected{background:#3a3020;color:#e4bd72}
+@media(max-width:700px){
+ .calendar-row{grid-template-columns:42px minmax(0,1fr) auto;gap:9px}
+ .calendar-row>strong{font-size:13px}
+ .fixed-cost-summary{grid-template-columns:1fr 1fr}.fixed-cost-summary span:last-child{grid-column:1/-1}
+ .insight-grid{grid-template-columns:1fr 1fr}
+ .insight-months span{display:none}
+}
