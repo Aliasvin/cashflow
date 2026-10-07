@@ -7,7 +7,7 @@ export const frequencyLabel=(f:RecurringFrequency='monthly')=>({weekly:'Wekelijk
 function anchor(r:RecurringTransaction){const f=r.frequency||'monthly';if(r.startDate){const [y,m,d]=r.startDate.split('-').map(Number);const a=new Date(y,m-1,d);if((f==='biweekly'||f==='fourweekly')&&r.dayOfWeek!==undefined){const delta=(r.dayOfWeek-a.getDay()+7)%7;return new Date(+a+delta*DAY)}return a}const n=dateOnly(new Date());if(f==='weekly'&&r.dayOfWeek!==undefined){const delta=(r.dayOfWeek-n.getDay()+7)%7;return new Date(+n+delta*DAY)}return clampDay(n.getFullYear(),n.getMonth(),r.dayOfMonth||1)}
 function addMonths(a:Date,n:number,day:number){return clampDay(a.getFullYear(),a.getMonth()+n,day)}
 export function occurrences(r:RecurringTransaction,from:Date,to:Date){const start=dateOnly(from),end=dateOnly(to),a=anchor(r),f=r.frequency||'monthly',dates:Date[]=[];if(f==='weekly'||f==='biweekly'||f==='fourweekly'){const step=f==='weekly'?7:f==='biweekly'?14:28;let d=new Date(a);if(d<start){const jumps=Math.ceil((+start-+d)/(DAY*step));d=new Date(+d+jumps*step*DAY)}while(d<=end){dates.push(new Date(d));d=new Date(+d+step*DAY)}return dates}const months=f==='monthly'?1:f==='quarterly'?3:12,day=r.dayOfMonth||a.getDate();let n=0,d=addMonths(a,0,day);while(d<start){n+=months;d=addMonths(a,n,day)}while(d<=end){dates.push(d);n+=months;d=addMonths(a,n,day)}return dates}
-export function upcoming(data:FinanceData,days=45){const now=dateOnly(new Date()),end=new Date(+now+days*DAY);return data.recurringTransactions.filter(r=>r.active).flatMap(item=>occurrences(item,now,end).map(date=>({item,date}))).sort((a,b)=>+a.date-+b.date)}
+export function upcoming(data:FinanceData,days=45){const now=dateOnly(new Date()),end=new Date(+now+days*DAY),done=new Set(data.processedRecurringOccurrences??[]);return data.recurringTransactions.filter(r=>r.active).flatMap(item=>occurrences(item,now,end).map(date=>({item,date,key:occurrenceKey(item,date)}))).filter(x=>!done.has(x.key)).sort((a,b)=>+a.date-+b.date)}
 export function monthlyEquivalent(r:RecurringTransaction){const f=r.frequency||'monthly';if(f==='weekly')return r.amount*52/12;if(f==='biweekly')return r.amount*26/12;if(f==='fourweekly')return r.amount*13/12;if(f==='quarterly')return r.amount/3;if(f==='yearly')return r.amount/12;return r.amount}
 export function spendable(data:FinanceData){const checking=data.accounts.filter(a=>a.type==='checking'||a.type==='cash').reduce((s,a)=>s+accountBalance(data,a.id),0),list=upcoming(data,31),incoming=list.filter(x=>x.item.type==='income').reduce((s,x)=>s+x.item.amount,0),outgoing=list.filter(x=>x.item.type==='expense').reduce((s,x)=>s+x.item.amount,0);return{checking,incoming,outgoing,value:checking+incoming-outgoing}}
 
@@ -40,12 +40,21 @@ export function projectedBalance(data:FinanceData,days=45){
   const checking=data.accounts
     .filter(a=>a.type==='checking'||a.type==='cash')
     .reduce((s,a)=>s+accountBalance(data,a.id),0);
-  const events=upcoming(data,days);
+  const recurringEvents=upcoming(data,days).map(event=>({date:event.date,type:event.item.type,amount:event.item.amount,label:event.item.description}));
+  const end=new Date(+today+days*DAY);
+  const manualEvents=data.transactions
+    .filter(t=>{const d=new Date(t.date+'T12:00:00');return d>today&&d<=end;})
+    .flatMap(t=>{
+      const date=new Date(t.date+'T12:00:00');
+      if(t.type==='transfer') return [];
+      return [{date,type:t.type,amount:t.amount,label:t.description}];
+    });
+  const events=[...recurringEvents,...manualEvents].sort((a,b)=>+a.date-+b.date);
   let balance=checking;
   const points=[{date:today,balance,label:'Vandaag'}];
   for(const event of events){
-    balance += event.item.type==='income' ? event.item.amount : -event.item.amount;
-    points.push({date:event.date,balance,label:event.item.description});
+    balance += event.type==='income' ? event.amount : -event.amount;
+    points.push({date:event.date,balance,label:event.label});
   }
   return points;
 }
@@ -57,8 +66,11 @@ export function monthCalendar(data:FinanceData,monthKey:string){
   const actual=data.transactions
     .filter(t=>t.date.startsWith(monthKey))
     .map(t=>({kind:'actual' as const,date:new Date(t.date+'T12:00:00'),description:t.description,type:t.type,amount:t.amount,id:t.id}));
+  const done=new Set(data.processedRecurringOccurrences??[]);
   const expected=data.recurringTransactions
     .filter(r=>r.active)
-    .flatMap(r=>occurrences(r,from,to).map(date=>({kind:'expected' as const,date,description:r.description,type:r.type,amount:r.amount,id:`${r.id}-${+date}`})));
+    .flatMap(r=>occurrences(r,from,to)
+      .filter(date=>!done.has(occurrenceKey(r,date)))
+      .map(date=>({kind:'expected' as const,date,description:r.description,type:r.type,amount:r.amount,id:`${r.id}-${+date}`})));
   return [...actual,...expected].sort((a,b)=>+a.date-+b.date);
 }
