@@ -13,3 +13,52 @@ export function spendable(data:FinanceData){const checking=data.accounts.filter(
 
 export const occurrenceKey=(r:RecurringTransaction,date:Date)=>`${r.id}:${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 export function dueRecurring(data:FinanceData,lookbackDays=31){const today=dateOnly(new Date()),from=new Date(+today-lookbackDays*DAY),done=new Set(data.processedRecurringOccurrences??[]);return data.recurringTransactions.filter(r=>r.active).flatMap(item=>occurrences(item,from,today).map(date=>({item,date,key:occurrenceKey(item,date)}))).filter(x=>!done.has(x.key)).sort((a,b)=>+a.date-+b.date)}
+
+
+export function nextIncomeSpendable(data:FinanceData){
+  const today=dateOnly(new Date());
+  const future=upcoming(data,120);
+  const nextIncome=future.find(x=>x.item.type==='income');
+  const checking=data.accounts
+    .filter(a=>a.type==='checking'||a.type==='cash')
+    .reduce((s,a)=>s+accountBalance(data,a.id),0);
+
+  if(!nextIncome){
+    return {checking,outgoing:0,value:checking,nextIncome:null as null|Date,days:0,daily:checking};
+  }
+
+  const outgoing=future
+    .filter(x=>x.item.type==='expense' && x.date<nextIncome.date)
+    .reduce((s,x)=>s+x.item.amount,0);
+  const value=checking-outgoing;
+  const days=Math.max(1,Math.ceil((+dateOnly(nextIncome.date)-+today)/DAY));
+  return {checking,outgoing,value,nextIncome:nextIncome.date,days,daily:value/days};
+}
+
+export function projectedBalance(data:FinanceData,days=45){
+  const today=dateOnly(new Date());
+  const checking=data.accounts
+    .filter(a=>a.type==='checking'||a.type==='cash')
+    .reduce((s,a)=>s+accountBalance(data,a.id),0);
+  const events=upcoming(data,days);
+  let balance=checking;
+  const points=[{date:today,balance,label:'Vandaag'}];
+  for(const event of events){
+    balance += event.item.type==='income' ? event.item.amount : -event.item.amount;
+    points.push({date:event.date,balance,label:event.item.description});
+  }
+  return points;
+}
+
+export function monthCalendar(data:FinanceData,monthKey:string){
+  const [year,month]=monthKey.split('-').map(Number);
+  const from=new Date(year,month-1,1);
+  const to=new Date(year,month,0);
+  const actual=data.transactions
+    .filter(t=>t.date.startsWith(monthKey))
+    .map(t=>({kind:'actual' as const,date:new Date(t.date+'T12:00:00'),description:t.description,type:t.type,amount:t.amount,id:t.id}));
+  const expected=data.recurringTransactions
+    .filter(r=>r.active)
+    .flatMap(r=>occurrences(r,from,to).map(date=>({kind:'expected' as const,date,description:r.description,type:r.type,amount:r.amount,id:`${r.id}-${+date}`})));
+  return [...actual,...expected].sort((a,b)=>+a.date-+b.date);
+}
