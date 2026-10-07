@@ -63,23 +63,17 @@ export function Recurring({data,setData}:{data:FinanceData;setData:(d:FinanceDat
   return `iedere ${d.getDate()}e`;
  };
 
- const recurringRow=(r:RecurringTransaction)=><div className="row recurring-row" key={r.id}>
-  <div className="recurring-content">
-   <div className="recurring-title">
-    <b>{r.description}</b>
-    <div className="recurring-badges">{r.fixedCost&&<span className="badge">Vaste last</span>}{!r.active&&<span className="badge muted-badge">Gepauzeerd</span>}</div>
-   </div>
-   <strong className={`recurring-amount ${r.type}`}>{r.type==='income'?'+ ':'- '}{euro(r.amount)}</strong>
-   <div className="recurring-meta">{frequencyLabel(r.frequency)} · {dateLabel(r)}</div>
-   <div className="recurring-periods">
-    <span><b>{euro(monthlyEquivalent(r))}</b> per maand</span>
-    <span><b>{euro(monthlyEquivalent(r)*12)}</b> per jaar</span>
-   </div>
+ const recurringRow=(r:RecurringTransaction)=><div className="row recurring-row recurring-row-minimal" key={r.id}>
+  <div className="recurring-minimal-content">
+   <div className="recurring-minimal-title"><b>{r.description}</b>{r.fixedCost&&<span className="badge">Vaste last</span>}{!r.active&&<span className="badge muted-badge">Gepauzeerd</span>}</div>
+   <div className="recurring-minimal-meta">{frequencyLabel(r.frequency)} · {dateLabel(r)}</div>
+   <strong className={`recurring-minimal-amount ${r.type}`}>{r.type==='income'?'+ ':'- '}{euro(r.amount)}{(r.frequency||'monthly')==='weekly'?' per week':(r.frequency==='biweekly'?' per 2 weken':(r.frequency==='fourweekly'?' per 4 weken':(r.frequency==='yearly'?' per jaar':(r.frequency==='quarterly'?' per kwartaal':' p/m'))))}</strong>
+   <div className="recurring-minimal-periods">{euro(monthlyEquivalent(r))} p/m <span>·</span> {euro(monthlyEquivalent(r)*12)} per jaar</div>
   </div>
-  <div className="recurring-actions">
-   <button className="recurring-action" aria-label={`${r.description} bewerken`} onClick={()=>openEdit(r)}><Pencil size={17}/><span>Bewerken</span></button>
-   <button className="recurring-action" onClick={()=>toggle(r.id)}><span className="action-pause">{r.active?'Pauze':'Activeer'}</span></button>
-   <button className="recurring-action danger-action" aria-label={`${r.description} verwijderen`} onClick={()=>remove(r.id)}><Trash2 size={17}/><span>Verwijderen</span></button>
+  <div className="recurring-minimal-actions">
+   <button className="recurring-text-action" onClick={()=>openEdit(r)}><Pencil size={15}/>Bewerken</button>
+   <button className="recurring-text-action" onClick={()=>toggle(r.id)}>{r.active?'Pauze':'Activeer'}</button>
+   <button className="recurring-text-action danger-action" onClick={()=>remove(r.id)}><Trash2 size={15}/>Verwijderen</button>
   </div>
  </div>;
 
@@ -108,11 +102,11 @@ export function Recurring({data,setData}:{data:FinanceData;setData:(d:FinanceDat
 
   <div className="recurring-sections">
    <section className="card recurring-section">
-    <div className="section-title"><div><h2>Terugkerende inkomsten</h2><p>Periodieke inkomsten zoals salaris en toeslagen.</p></div><span className="section-total income">+ {euro(incomeMonthly)} p/m</span></div>
+    <div className="section-title"><div><h2>Terugkerende inkomsten</h2><p>Periodieke inkomsten zoals salaris en toeslagen.</p></div></div>
     {incomes.length===0?<div className="empty">Nog geen terugkerende inkomsten.</div>:incomes.map(recurringRow)}
    </section>
    <section className="card recurring-section">
-    <div className="section-title"><div><h2>Terugkerende uitgaven</h2><p>Periodieke uitgaven en vaste lasten.</p></div><span className="section-total expense">- {euro(expenseMonthly)} p/m</span></div>
+    <div className="section-title"><div><h2>Terugkerende uitgaven</h2><p>Periodieke uitgaven en vaste lasten.</p></div></div>
     {expenses.length===0?<div className="empty">Nog geen terugkerende uitgaven.</div>:expenses.map(recurringRow)}
    </section>
   </div>
