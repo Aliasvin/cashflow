@@ -28,3 +28,100 @@
     font-size:9px;
   }
 }
+
+/* Maandoverzicht en uitgaven per categorie */
+.month-switcher{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  background:#fff;
+  border:1px solid #e5e8e6;
+  border-radius:16px;
+  padding:12px 16px;
+  margin-bottom:18px;
+}
+.month-switcher>div{
+  min-width:190px;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.month-switcher small{
+  color:#7b827f;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-weight:700;
+}
+.month-switcher strong{
+  text-transform:capitalize;
+  font-size:15px;
+}
+.month-button{
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  border:1px solid #e1e5e3;
+  border-radius:10px;
+  background:#fff;
+  color:#173f34;
+  cursor:pointer;
+}
+.month-button:hover{background:#f4f7f6}
+.category-overview{padding-bottom:18px}
+.category-chart{
+  display:grid;
+  gap:18px;
+  padding-top:10px;
+}
+.category-chart-row{
+  display:grid;
+  gap:7px;
+}
+.category-chart-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  font-size:14px;
+}
+.category-chart-head span{font-weight:600}
+.category-chart-head strong{font-size:14px}
+.category-bar-track{
+  height:12px;
+  width:100%;
+  background:#edf1ef;
+  border-radius:999px;
+  overflow:hidden;
+}
+.category-bar{
+  display:block;
+  height:100%;
+  min-width:4px;
+  border-radius:999px;
+  background:#2d6a59;
+}
+.category-chart-row small{
+  color:#858c89;
+  font-size:11px;
+}
+.category-total{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-top:1px solid #edf0ee;
+  margin-top:20px;
+  padding-top:18px;
+}
+.category-total span{color:#68716d}
+.category-total strong{font-size:18px}
+.category-empty{padding-bottom:18px}
+
+@media(max-width:760px){
+  .month-switcher{gap:10px;padding:10px 12px}
+  .month-switcher>div{min-width:0;flex:1}
+  .category-chart-head{align-items:flex-start}
+}
