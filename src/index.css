@@ -155,3 +155,10 @@ html[data-theme="dark"] .badge{background:#263a32;color:#9ed0bd}
 html[data-theme="dark"] .muted-badge{background:#29302d;color:#aab3af}
 @media(max-width:900px){.recurring-sections{grid-template-columns:1fr}.recurring-summary{grid-template-columns:1fr}}
 @media(max-width:600px){.recurring-section .section-title{flex-direction:column}.recurring-row{align-items:flex-start}.recurring-row .amount-actions{width:100%;justify-content:flex-start;flex-wrap:wrap}}
+
+/* Modalen voor toevoegen en bewerken */
+.modal-backdrop{position:fixed;inset:0;z-index:1000;background:#0d1511a8;display:grid;place-items:center;padding:20px;backdrop-filter:blur(3px)}
+.modal-panel{width:min(680px,100%);max-height:min(820px,calc(100dvh - 40px));overflow:auto;background:#fff;border:1px solid #e2e7e4;border-radius:20px;padding:22px;box-shadow:0 24px 80px #0003}
+.modal-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.modal-header h2{margin:0;font-size:21px;letter-spacing:-.02em}.modal-close{display:grid;place-items:center;background:#f0f2f1;border-radius:9px;color:#58615d}.modal-form{margin:0}.modal-form .primary{min-height:44px}
+html[data-theme="dark"] .modal-panel{background:#18201d;border-color:#34413c}html[data-theme="dark"] .modal-close{background:#26302c;color:#dfe8e4}
+@media(max-width:760px){.modal-backdrop{place-items:end center;padding:0}.modal-panel{width:100%;max-height:88dvh;border-radius:22px 22px 0 0;padding:20px 18px 26px;border-bottom:0}.modal-header{position:sticky;top:-20px;background:inherit;z-index:2;padding:20px 0 12px;margin-top:-20px}.modal-form{grid-template-columns:1fr}}
