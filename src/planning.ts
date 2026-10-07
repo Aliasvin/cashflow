@@ -1,0 +1,12 @@
+import type { FinanceData, RecurringFrequency, RecurringTransaction } from '../types/finance';
+import { accountBalance } from './finance';
+const DAY=86400000;
+const dateOnly=(d:Date)=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
+const clampDay=(y:number,m:number,day:number)=>new Date(y,m,Math.min(day,new Date(y,m+1,0).getDate()));
+export const frequencyLabel=(f:RecurringFrequency='monthly')=>({weekly:'Wekelijks',biweekly:'Elke 2 weken',fourweekly:'Elke 4 weken',monthly:'Maandelijks',quarterly:'Per kwartaal',yearly:'Jaarlijks'}[f]);
+function anchor(r:RecurringTransaction){if(r.startDate){const [y,m,d]=r.startDate.split('-').map(Number);return new Date(y,m-1,d)}const n=new Date();return clampDay(n.getFullYear(),n.getMonth(),r.dayOfMonth||1)}
+function addMonths(a:Date,n:number,day:number){return clampDay(a.getFullYear(),a.getMonth()+n,day)}
+export function occurrences(r:RecurringTransaction,from:Date,to:Date){const start=dateOnly(from),end=dateOnly(to),a=anchor(r),f=r.frequency||'monthly',dates:Date[]=[];if(f==='weekly'||f==='biweekly'||f==='fourweekly'){const step=f==='weekly'?7:f==='biweekly'?14:28;let d=new Date(a);if(d<start){const jumps=Math.ceil((+start-+d)/(DAY*step));d=new Date(+d+jumps*step*DAY)}while(d<=end){dates.push(new Date(d));d=new Date(+d+step*DAY)}return dates}const months=f==='monthly'?1:f==='quarterly'?3:12,day=r.dayOfMonth||a.getDate();let n=0,d=addMonths(a,0,day);while(d<start){n+=months;d=addMonths(a,n,day)}while(d<=end){dates.push(d);n+=months;d=addMonths(a,n,day)}return dates}
+export function upcoming(data:FinanceData,days=45){const now=dateOnly(new Date()),end=new Date(+now+days*DAY);return data.recurringTransactions.filter(r=>r.active).flatMap(item=>occurrences(item,now,end).map(date=>({item,date}))).sort((a,b)=>+a.date-+b.date)}
+export function monthlyEquivalent(r:RecurringTransaction){const f=r.frequency||'monthly';if(f==='weekly')return r.amount*52/12;if(f==='biweekly')return r.amount*26/12;if(f==='fourweekly')return r.amount*13/12;if(f==='quarterly')return r.amount/3;if(f==='yearly')return r.amount/12;return r.amount}
+export function spendable(data:FinanceData){const checking=data.accounts.filter(a=>a.type==='checking'||a.type==='cash').reduce((s,a)=>s+accountBalance(data,a.id),0),list=upcoming(data,31),incoming=list.filter(x=>x.item.type==='income').reduce((s,x)=>s+x.item.amount,0),outgoing=list.filter(x=>x.item.type==='expense').reduce((s,x)=>s+x.item.amount,0);return{checking,incoming,outgoing,value:checking+incoming-outgoing}}
