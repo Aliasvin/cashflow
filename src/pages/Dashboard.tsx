@@ -107,6 +107,15 @@ export function Dashboard({ data, setData }: { data: FinanceData; setData: (data
     ? insightMonths.filter(m=>m.income>0).reduce((s,m)=>s+m.income,0)/insightMonths.filter(m=>m.income>0).length:0;
   const savingsRate=avgIncome>0?Math.max(0,(avgIncome-avgExpenses)/avgIncome*100):0;
   const largestExpense=[...data.transactions].filter(t=>t.type==='expense').sort((a,b)=>b.amount-a.amount)[0];
+  const pokemonLabels:Record<string,string>={single_cards:'Losse kaarten',sealed:'Sealed producten',boosters:'Booster packs',accessories:'Accessoires',grading:'Grading',other:'Overig'};
+  const pokemonYear=String(new Date().getFullYear()), pokemonMonthKey=new Date().toISOString().slice(0,7);
+  const pokemonTx=data.transactions.filter(t=>t.pokemon?.enabled);
+  const pokemonY=pokemonTx.filter(t=>t.date.startsWith(pokemonYear));
+  const pokemonPurchasesYear=pokemonY.filter(t=>t.pokemon?.direction==='purchase').reduce((a,t)=>a+t.amount,0);
+  const pokemonSalesYear=pokemonY.filter(t=>t.pokemon?.direction==='sale').reduce((a,t)=>a+t.amount,0);
+  const pokemonMonth=pokemonTx.filter(t=>t.date.startsWith(pokemonMonthKey)&&t.pokemon?.direction==='purchase').reduce((a,t)=>a+t.amount,0);
+  const pokemonByType=Object.entries(pokemonY.filter(t=>t.pokemon?.direction==='purchase').reduce((a,t)=>{const k=t.pokemon?.purchaseType||'other';a[k]=(a[k]||0)+t.amount;return a},{} as Record<string,number>)).sort((a,b)=>b[1]-a[1]);
+
   const forecast = upcoming(data, 45).slice(0, 8);
   const due=dueRecurring(data,31).slice(0,8);
   const processRecurring=(entry:(typeof due)[number])=>{const d=entry.date;const date=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;setData({...data,transactions:[{id:crypto.randomUUID(),type:entry.item.type,amount:entry.item.amount,description:entry.item.description,date,accountId:entry.item.accountId,categoryId:entry.item.categoryId},...data.transactions],processedRecurringOccurrences:[...(data.processedRecurringOccurrences??[]),entry.key]})};
@@ -237,6 +246,15 @@ export function Dashboard({ data, setData }: { data: FinanceData; setData: (data
         </div>
         {largestExpense&&<div className="insight-highlight"><span>Grootste uitgave</span><b>{largestExpense.description}</b><strong>{euro(largestExpense.amount)}</strong></div>}
         <div className="insight-months">{insightMonths.map(m=><div key={m.key}><small>{m.label}</small><i style={{height:`${Math.max(6,Math.min(100,avgExpenses?m.expenses/Math.max(...insightMonths.map(x=>x.expenses),1)*100:6))}%`}}/><span>{euro(m.expenses)}</span></div>)}</div>
+      </section>
+
+      <section className="card pokemon-overview">
+        <div className="section-title"><div><h2>Pokémon</h2><p>Uitgaven en verkopen voor je collectie</p></div></div>
+        <div className="pokemon-summary-grid">
+          <span><small>Deze maand</small><b>{euro(pokemonMonth)}</b></span><span><small>Dit jaar gekocht</small><b>{euro(pokemonPurchasesYear)}</b></span>
+          <span><small>Dit jaar verkocht</small><b className="income">{euro(pokemonSalesYear)}</b></span><span><small>Netto uitgegeven</small><b>{euro(pokemonPurchasesYear-pokemonSalesYear)}</b></span>
+        </div>
+        {pokemonByType.length===0?<div className="empty">Markeer transacties als Pokémon-aankoop of -verkoop om hier inzicht te krijgen.</div>:pokemonByType.map(([k,v])=><div className="row" key={k}><div><b>{pokemonLabels[k]||'Overig'}</b><small>Dit jaar</small></div><strong>{euro(v)}</strong></div>)}
       </section>
 
       <section className="card category-overview">
