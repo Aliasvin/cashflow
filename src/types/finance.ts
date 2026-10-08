@@ -12,13 +12,6 @@ export interface Transaction {
   accountId: string;
   categoryId?: string;
   toAccountId?: string;
-  pokemon?: {
-    enabled: boolean;
-    direction: 'purchase' | 'sale';
-    purchaseType?: 'single_cards' | 'sealed' | 'boosters' | 'accessories' | 'grading' | 'other';
-    shop?: string;
-    note?: string;
-  };
 }
 export interface SavingsGoal { id:string; name:string; targetAmount:number; currentAmount:number; targetDate?:string; accountId?:string }
 export type RecurringFrequency = 'weekly'|'biweekly'|'fourweekly'|'monthly'|'quarterly'|'yearly';
