@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
-import { House, ArrowLeftRight, WalletCards, Target, MoreHorizontal, Repeat2 } from 'lucide-react';
+import { House, ArrowLeftRight, WalletCards, Target, MoreHorizontal, Repeat2, Gamepad2 } from 'lucide-react';
 
-export type Page = 'dashboard' | 'transactions' | 'accounts' | 'recurring' | 'savings' | 'settings';
+export type Page = 'dashboard' | 'transactions' | 'accounts' | 'recurring' | 'savings' | 'pokemon' | 'settings';
 
 const desktopItems: [Page, string, any][] = [
   ['dashboard', 'Dashboard', House],
@@ -9,6 +9,7 @@ const desktopItems: [Page, string, any][] = [
   ['accounts', 'Rekeningen', WalletCards],
   ['recurring', 'Terugkerend', Repeat2],
   ['savings', 'Spaardoelen', Target],
+  ['pokemon', 'Pokémon', Gamepad2],
   ['settings', 'Instellingen', MoreHorizontal],
 ];
 
@@ -18,6 +19,7 @@ const mobileItems: [Page, string, any][] = [
   ['accounts', 'Rekeningen', WalletCards],
   ['recurring', 'Terugkerend', Repeat2],
   ['savings', 'Spaardoelen', Target],
+  ['pokemon', 'Pokémon', Gamepad2],
   ['settings', 'Meer', MoreHorizontal],
 ];
 
