@@ -17,7 +17,7 @@ export function Pokemon({data,setData,pokemonTransactions,setPokemonTransactions
  pokemonTransactions:PokemonTransaction[];setPokemonTransactions:(v:PokemonTransaction[])=>void;
  pokemonAssets:PokemonAsset[];setPokemonAssets:(v:PokemonAsset[])=>void;
 }){
- const [tab,setTab]=useState<'overview'|'transactions'|'value'>('overview');
+ const [tab,setTab]=useState<'overview'|'transactions'|'value'|'sold'>('overview');
  const [selectedMonth,setSelectedMonth]=useState(monthKey());
  const [open,setOpen]=useState(false),[editing,setEditing]=useState<PokemonTransaction|null>(null);
  const [type,setType]=useState<'purchase'|'sale'>('purchase');
@@ -33,6 +33,14 @@ export function Pokemon({data,setData,pokemonTransactions,setPokemonTransactions
  const purchasesYear=yearItems.filter(i=>i.type==='purchase').reduce((s,i)=>s+i.amount,0),salesYear=yearItems.filter(i=>i.type==='sale').reduce((s,i)=>s+i.amount,0);
  const ownedAssets=pokemonAssets.filter(a=>a.status!=='sold');
  const purchaseValue=ownedAssets.reduce((s,a)=>s+a.purchasePrice,0),currentValue=ownedAssets.reduce((s,a)=>s+latestValue(a),0),valueChange=currentValue-purchaseValue;
+ const soldAssets=pokemonAssets.filter(a=>a.status==='sold');
+ const soldPurchaseValue=soldAssets.reduce((sum,a)=>sum+a.purchasePrice,0);
+ const soldRevenue=soldAssets.reduce((sum,a)=>sum+(a.soldPrice??0),0);
+ const realizedResult=soldRevenue-soldPurchaseValue;
+ const unrealizedResult=currentValue-purchaseValue;
+ const totalPokemonResult=realizedResult+unrealizedResult;
+ const unrealizedPct=purchaseValue?unrealizedResult/purchaseValue*100:0;
+ const realizedPct=soldPurchaseValue?realizedResult/soldPurchaseValue*100:0;
  const purchaseTransactions=pokemonTransactions.filter(t=>t.type==='purchase').sort((a,b)=>b.date.localeCompare(a.date));
  const allocatedTo=(transactionId:string)=>pokemonAssets.filter(a=>a.transactionId===transactionId).reduce((sum,a)=>sum+a.purchasePrice,0);
  const linkedItems=(transactionId:string)=>pokemonAssets.filter(a=>a.transactionId===transactionId);
@@ -79,12 +87,12 @@ export function Pokemon({data,setData,pokemonTransactions,setPokemonTransactions
  return <>
   <header className="with-action"><div><p className="eyebrow">Collectie-uitgaven en waarde</p><h1>Pokémon</h1><p className="muted">Bekijk wat je uitgeeft, verkoopt en wat je collectie ongeveer waard is.</p></div>
    <button className="primary" onClick={()=>tab==='value'?setAssetOpen(true):(setEditing(null),setType('purchase'),setOpen(true))}><Plus size={18}/>{tab==='value'?'Kaart toevoegen':'Transactie'}</button></header>
-  <div className="pokemon-tabs"><button className={tab==='overview'?'active':''} onClick={()=>setTab('overview')}>Overzicht</button><button className={tab==='transactions'?'active':''} onClick={()=>setTab('transactions')}>Transacties</button><button className={tab==='value'?'active':''} onClick={()=>setTab('value')}>Waarde</button></div>
+  <div className="pokemon-tabs"><button className={tab==='overview'?'active':''} onClick={()=>setTab('overview')}>Overzicht</button><button className={tab==='transactions'?'active':''} onClick={()=>setTab('transactions')}>Transacties</button><button className={tab==='value'?'active':''} onClick={()=>setTab('value')}>Waarde</button><button className={tab==='sold'?'active':''} onClick={()=>setTab('sold')}>Verkocht</button></div>
 
   {tab==='overview'&&<>
    <div className="pokemon-summary-grid">
     <article className="card"><small>Dit jaar gekocht</small><b>{euro(purchasesYear)}</b></article><article className="card"><small>Dit jaar verkocht</small><b className="income">{euro(salesYear)}</b></article>
-    <article className="card"><small>Huidige collectiewaarde</small><b>{euro(currentValue)}</b></article><article className="card"><small>Waardeverschil</small><b className={valueChange>=0?'income':'expense'}>{valueChange>=0?'+ ':''}{euro(valueChange)}</b></article>
+    <article className="card"><small>Huidige collectiewaarde</small><b>{euro(currentValue)}</b></article><article className="card"><small>Ongerealiseerd resultaat</small><b className={unrealizedResult>=0?'income':'expense'}>{unrealizedResult>=0?'+ ':''}{euro(unrealizedResult)} <small>({unrealizedResult>=0?'+':''}{unrealizedPct.toFixed(1)}%)</small></b></article><article className="card"><small>Gerealiseerd resultaat</small><b className={realizedResult>=0?'income':'expense'}>{realizedResult>=0?'+ ':''}{euro(realizedResult)} <small>({realizedResult>=0?'+':''}{realizedPct.toFixed(1)}%)</small></b></article><article className="card"><small>Totaal Pokémon-resultaat</small><b className={totalPokemonResult>=0?'income':'expense'}>{totalPokemonResult>=0?'+ ':''}{euro(totalPokemonResult)}</b></article>
    </div>
    <section className="card"><div className="section-title"><div><h2>Collectiewaarde</h2><p>Op basis van je handmatig ingevoerde waardemomenten</p></div></div>
     {history.length<2?<div className="empty">Voeg bij Waarde meerdere waardemomenten toe om hier de ontwikkeling te zien.</div>:
@@ -106,6 +114,11 @@ export function Pokemon({data,setData,pokemonTransactions,setPokemonTransactions
    <section className="card"><div className="section-title"><div><h2>Kaarten en items</h2><p>De nieuwste waarderegistratie bepaalt de huidige waarde.</p></div></div>
     {pokemonAssets.length===0?<div className="empty">Nog geen kaarten toegevoegd.</div>:pokemonAssets.map(a=><div className="pokemon-asset" key={a.id}><div><b>{a.name}</b><small>Aankoop {euro(a.purchasePrice)} · {fmtDate(a.purchaseDate)}</small><small>{a.valueHistory.length} waardemoment{a.valueHistory.length===1?'':'en'}</small>{a.transactionId&&<small>Gekoppeld aan: {pokemonTransactions.find(t=>t.id===a.transactionId)?.description??'Aankoop'}</small>}</div><div className="pokemon-asset-value">{a.status==='sold'?<><small>Verkocht voor</small><strong className="income">{euro(a.soldPrice??0)}</strong><small>{a.soldDate?fmtDate(a.soldDate):''} · resultaat {(a.soldPrice??0)-a.purchasePrice>=0?'+ ':''}{euro((a.soldPrice??0)-a.purchasePrice)}</small></>:<><small>Huidige waarde</small><strong>{euro(latestValue(a))}</strong></>}</div><div className="pokemon-entry-actions"><button className="transaction-action" onClick={()=>setEditingAsset(a)}>Bewerken</button>{a.status!=='sold'&&<><button className="transaction-action" onClick={()=>setValueAsset(a)}><Plus size={15}/>Waarde bijwerken</button><button className="transaction-action" onClick={()=>setSellingAsset(a)}>Verkocht</button></>}<button className="transaction-action danger-action" onClick={()=>removeAsset(a)}><Trash2 size={15}/>Verwijderen</button></div></div>)}
    </section>
+  </>}
+
+  {tab==='sold'&&<>
+   <div className="pokemon-summary-grid"><article className="card"><small>Aankoopkosten verkocht</small><b>{euro(soldPurchaseValue)}</b></article><article className="card"><small>Verkoopopbrengst</small><b>{euro(soldRevenue)}</b></article><article className="card"><small>Gerealiseerd resultaat</small><b className={realizedResult>=0?'income':'expense'}>{realizedResult>=0?'+ ':''}{euro(realizedResult)}</b></article><article className="card"><small>Rendement</small><b className={realizedResult>=0?'income':'expense'}>{realizedResult>=0?'+':''}{realizedPct.toFixed(1)}%</b></article></div>
+   <section className="card"><div className="section-title"><div><h2>Verkochte kaarten en items</h2><p>Historie van je gerealiseerde Pokémon-resultaten.</p></div></div>{soldAssets.length===0?<div className="empty">Nog geen kaarten of items verkocht.</div>:[...soldAssets].sort((a,b)=>(b.soldDate??'').localeCompare(a.soldDate??'')).map(a=>{const result=(a.soldPrice??0)-a.purchasePrice,pct=a.purchasePrice?result/a.purchasePrice*100:0;return <div className="pokemon-asset" key={a.id}><div><b>{a.name}</b><small>Gekocht {euro(a.purchasePrice)} · {fmtDate(a.purchaseDate)}</small><small>Verkocht {a.soldDate?fmtDate(a.soldDate):''}</small></div><div className="pokemon-asset-value"><small>Verkoopprijs</small><strong>{euro(a.soldPrice??0)}</strong><small className={result>=0?'income':'expense'}>{result>=0?'+ ':''}{euro(result)} ({result>=0?'+':''}{pct.toFixed(1)}%)</small></div></div>})}</section>
   </>}
 
   <Modal open={open} title={editing?'Pokémon-transactie bewerken':'Pokémon-transactie toevoegen'} onClose={close}><form className="form modal-form" onSubmit={save}>
