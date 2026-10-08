@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { House, ArrowLeftRight, WalletCards, Target, MoreHorizontal, Repeat2, Gamepad2, Settings } from 'lucide-react';
+import { House, ArrowLeftRight, WalletCards, Target, MoreHorizontal, Repeat2, PlayingCards, Settings } from 'lucide-react';
 
 export type Page = 'dashboard' | 'transactions' | 'accounts' | 'recurring' | 'savings' | 'pokemon' | 'settings';
 
@@ -8,7 +8,7 @@ const desktopItems: [Page, string, any][] = [
   ['transactions', 'Transacties', ArrowLeftRight],
   ['accounts', 'Rekeningen', WalletCards],
   ['recurring', 'Terugkerend', Repeat2],
-  ['pokemon', 'Pokémon', Gamepad2],
+  ['pokemon', 'Pokémon', PlayingCards],
   ['savings', 'Spaardoelen', Target],
   ['settings', 'Instellingen', Settings],
 ];
@@ -18,7 +18,7 @@ const mobileItems: [Page, string, any][] = [
   ['transactions', 'Transacties', ArrowLeftRight],
   ['accounts', 'Rekeningen', WalletCards],
   ['recurring', 'Terugkerend', Repeat2],
-  ['pokemon', 'Pokémon', Gamepad2],
+  ['pokemon', 'Pokémon', PlayingCards],
 ];
 
 export function Layout({
