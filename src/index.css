@@ -635,3 +635,9 @@ html[data-theme="dark"] .pokemon-entry{border-color:#2b3531}
 html[data-theme="dark"] .pokemon-tabs{background:#222c28}html[data-theme="dark"] .pokemon-tabs button.active{background:#18201d}.pokemon-chart{color:var(--accent,#285b4d)}
 html[data-theme="dark"] .pokemon-asset,html[data-theme="dark"] .value-history{border-color:#2b3531}
 @media(max-width:760px){.pokemon-tabs{width:100%;display:grid;grid-template-columns:repeat(3,1fr)}.pokemon-tabs button{padding:8px 6px}.pokemon-asset{grid-template-columns:1fr auto}.pokemon-chart svg{height:170px}}
+
+/* Pokémon collectie-items gekoppeld aan aankopen */
+.pokemon-linked-items{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:2px}
+.pokemon-linked-items small{color:#7d8782}
+.pokemon-linked-items small.income{color:inherit;font-weight:600}
+.form-hint{margin:-2px 0 4px;color:#7d8782;font-size:12px;line-height:1.45}
