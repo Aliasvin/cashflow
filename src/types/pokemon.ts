@@ -12,6 +12,7 @@ export interface PokemonTransaction {
   note?: string;
   accountId: string;
   linkedTransactionId: string;
+  assetId?: string;
 }
 
 export interface PokemonValuePoint {
@@ -28,4 +29,8 @@ export interface PokemonAsset {
   note?: string;
   transactionId?: string;
   valueHistory: PokemonValuePoint[];
+  status?: 'owned' | 'sold';
+  soldPrice?: number;
+  soldDate?: string;
+  saleTransactionId?: string;
 }
