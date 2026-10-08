@@ -8,8 +8,8 @@ const desktopItems: [Page, string, any][] = [
   ['transactions', 'Transacties', ArrowLeftRight],
   ['accounts', 'Rekeningen', WalletCards],
   ['recurring', 'Terugkerend', Repeat2],
-  ['savings', 'Spaardoelen', Target],
   ['pokemon', 'Pokémon', Gamepad2],
+  ['savings', 'Spaardoelen', Target],
   ['settings', 'Instellingen', MoreHorizontal],
 ];
 
@@ -18,7 +18,6 @@ const mobileItems: [Page, string, any][] = [
   ['transactions', 'Transacties', ArrowLeftRight],
   ['accounts', 'Rekeningen', WalletCards],
   ['recurring', 'Terugkerend', Repeat2],
-  ['savings', 'Spaardoelen', Target],
   ['pokemon', 'Pokémon', Gamepad2],
   ['settings', 'Meer', MoreHorizontal],
 ];
