@@ -574,3 +574,52 @@ html[data-theme="dark"] .pokemon-entry{border-color:#2b3531}
     text-align:center!important;
   }
 }
+
+/* Meer-menu definitieve fix */
+@media(max-width:760px){
+  .mobile-more-backdrop{
+    position:fixed;
+    inset:0;
+    z-index:68;
+    border:0;
+    background:rgba(0,0,0,.14);
+  }
+  .mobile-more-menu{
+    position:fixed;
+    left:14px;
+    right:14px;
+    bottom:82px;
+    z-index:69;
+    display:grid;
+    gap:4px;
+    padding:8px;
+    border:1px solid #e1e6e3;
+    border-radius:16px;
+    background:#fff;
+    box-shadow:0 14px 40px rgba(20,30,26,.18);
+  }
+  .mobile-more-menu>button{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    width:100%;
+    padding:12px;
+    border:0;
+    border-radius:11px;
+    background:transparent;
+    color:inherit;
+    font:inherit;
+    text-align:left;
+  }
+  .mobile-more-menu>button>span{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .mobile-more-menu b{font-size:14px}
+  .mobile-more-menu small{font-size:12px;color:#7d8782}
+  html[data-theme="dark"] .mobile-more-menu{
+    background:#18201d;
+    border-color:#2b3531;
+  }
+}
