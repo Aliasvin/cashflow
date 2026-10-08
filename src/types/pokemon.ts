@@ -13,3 +13,18 @@ export interface PokemonTransaction {
   accountId: string;
   linkedTransactionId: string;
 }
+
+export interface PokemonValuePoint {
+  id: string;
+  date: string;
+  value: number;
+}
+
+export interface PokemonAsset {
+  id: string;
+  name: string;
+  purchasePrice: number;
+  purchaseDate: string;
+  note?: string;
+  valueHistory: PokemonValuePoint[];
+}
