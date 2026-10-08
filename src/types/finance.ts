@@ -3,7 +3,23 @@ export interface Account { id:string; name:string; type:AccountType; startingBal
 export type CategoryType = 'income' | 'expense';
 export interface Category { id:string; name:string; type:CategoryType }
 export type TransactionType = 'income' | 'expense' | 'transfer';
-export interface Transaction { id:string; type:TransactionType; amount:number; description:string; date:string; accountId:string; categoryId?:string; toAccountId?:string }
+export interface Transaction {
+  id: string;
+  type: TransactionType;
+  amount: number;
+  description: string;
+  date: string;
+  accountId: string;
+  categoryId?: string;
+  toAccountId?: string;
+  pokemon?: {
+    enabled: boolean;
+    direction: 'purchase' | 'sale';
+    purchaseType?: 'single_cards' | 'sealed' | 'boosters' | 'accessories' | 'grading' | 'other';
+    shop?: string;
+    note?: string;
+  };
+}
 export interface SavingsGoal { id:string; name:string; targetAmount:number; currentAmount:number; targetDate?:string; accountId?:string }
 export type RecurringFrequency = 'weekly'|'biweekly'|'fourweekly'|'monthly'|'quarterly'|'yearly';
 export interface RecurringTransaction { id:string; type:'income'|'expense'; amount:number; description:string; accountId:string; categoryId:string; active:boolean; fixedCost?:boolean; frequency?:RecurringFrequency; startDate?:string; dayOfMonth?:number; dayOfWeek?:number }
