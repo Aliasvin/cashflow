@@ -528,73 +528,49 @@ html[data-theme="dark"] .pokemon-entry{border-color:#2b3531}
   .mobile-nav button{min-width:64px;flex:1 0 64px}
 }
 
-/* Mobiel Meer-menu */
+/* Mobiele navigatie: zes knoppen exact gelijk verdeeld */
 @media(max-width:760px){
   .mobile-nav{
+    display:grid!important;
+    grid-template-columns:repeat(6,minmax(0,1fr))!important;
+    align-items:stretch!important;
+    justify-content:initial!important;
+    gap:0!important;
     overflow:visible!important;
-    justify-content:space-around!important;
+    padding-left:8px!important;
+    padding-right:8px!important;
   }
   .mobile-nav>button{
+    width:100%!important;
     min-width:0!important;
-    flex:1 1 0!important;
+    max-width:none!important;
+    flex:none!important;
+    margin:0!important;
+    padding:8px 1px 7px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:4px!important;
+    text-align:center!important;
+    white-space:nowrap!important;
   }
-  .mobile-nav>button small{
-    font-size:10px;
+  .mobile-nav>button svg{
+    width:20px!important;
+    height:20px!important;
+    flex:0 0 20px!important;
+    margin:0!important;
   }
-  .mobile-more-backdrop{
-    position:fixed;
-    inset:0;
-    z-index:68;
-    border:0;
-    background:rgba(0,0,0,.16);
-  }
-  .mobile-more-menu{
-    position:fixed;
-    left:14px;
-    right:14px;
-    bottom:82px;
-    z-index:69;
-    display:grid;
-    gap:4px;
-    padding:8px;
-    border:1px solid #e1e6e3;
-    border-radius:16px;
-    background:#fff;
-    box-shadow:0 14px 40px rgba(20,30,26,.18);
-  }
-  .mobile-more-menu>button{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    width:100%;
-    padding:12px;
-    border:0;
-    border-radius:11px;
-    background:transparent;
-    color:inherit;
-    font:inherit;
-    text-align:left;
-  }
-  .mobile-more-menu>button:active{
-    background:#f2f5f3;
-  }
-  .mobile-more-menu>button>span{
-    display:flex;
-    flex-direction:column;
-    gap:2px;
-  }
-  .mobile-more-menu b{
-    font-size:14px;
-  }
-  .mobile-more-menu small{
-    color:#7d8782;
-    font-size:12px;
-  }
-  html[data-theme="dark"] .mobile-more-menu{
-    border-color:#2b3531;
-    background:#18201d;
-  }
-  html[data-theme="dark"] .mobile-more-menu>button:active{
-    background:#222c28;
+  .mobile-nav>button small,
+  .mobile-nav>button span{
+    display:block!important;
+    width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+    text-overflow:clip!important;
+    font-size:9.5px!important;
+    line-height:1.15!important;
+    text-align:center!important;
   }
 }
