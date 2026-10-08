@@ -8,7 +8,7 @@ const desktopItems: [Page, string, any][] = [
   ['transactions', 'Transacties', ArrowLeftRight],
   ['accounts', 'Rekeningen', WalletCards],
   ['recurring', 'Terugkerend', Repeat2],
-  ['pokemon', 'Pokémon', PlayingCards],
+  ['pokemon', 'Pokémon', PlayingCardsFan],
   ['savings', 'Spaardoelen', Target],
   ['settings', 'Instellingen', Settings],
 ];
@@ -18,7 +18,7 @@ const mobileItems: [Page, string, any][] = [
   ['transactions', 'Transacties', ArrowLeftRight],
   ['accounts', 'Rekeningen', WalletCards],
   ['recurring', 'Terugkerend', Repeat2],
-  ['pokemon', 'Pokémon', PlayingCards],
+  ['pokemon', 'Pokémon', PlayingCardsFan],
 ];
 
 export function Layout({
