@@ -524,7 +524,13 @@ html[data-theme="dark"] .pokemon-entry{border-color:#2b3531}
 
 @media(max-width:760px){
   .pokemon-summary-grid{grid-template-columns:1fr 1fr}
-  .mobile-nav{overflow-x:auto;overflow-y:hidden;justify-content:flex-start;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-  .mobile-nav::-webkit-scrollbar{display:none}
-  .mobile-nav button{min-width:68px;flex:0 0 68px}
+  .mobile-nav{overflow-x:auto;justify-content:flex-start}
+  .mobile-nav button{min-width:64px;flex:1 0 64px}
+}
+
+/* Mobiele hoofdnavigatie: Pokémon zichtbaar, Spaardoelen via Meer */
+@media(max-width:760px){
+  .mobile-nav{overflow:visible!important;justify-content:space-around!important}
+  .mobile-nav button{min-width:0!important;flex:1 1 0!important}
+  .mobile-nav button span{font-size:10px}
 }
