@@ -16,8 +16,6 @@ export function Transactions({ data, setData }: { data: FinanceData; setData: (d
   const [filterType, setFilterType] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [pokemonEnabled,setPokemonEnabled]=useState(false);
-  const [pokemonType,setPokemonType]=useState<'single_cards'|'sealed'|'boosters'|'accessories'|'grading'|'other'>('single_cards');
   const [selectedMonth, setSelectedMonth] = useState(() => new Date().toISOString().slice(0, 7));
 
   const changeMonth = (offset: number) => {
@@ -85,10 +83,6 @@ export function Transactions({ data, setData }: { data: FinanceData; setData: (d
     if (type === 'expense' && remember && transaction.categoryId) {
       rememberCategory(transaction.description, transaction.categoryId);
     }
-    if(pokemonEnabled && type!=='transfer'){
-      transaction.pokemon={enabled:true,direction:type==='income'?'sale':'purchase',purchaseType:pokemonType,
-        shop:String(f.get('pokemonShop')||'').trim()||undefined,note:String(f.get('pokemonNote')||'').trim()||undefined};
-    }
 
     setData({ ...data, transactions: editingId ? data.transactions.map(t => t.id === editingId ? { ...transaction, id: editingId } : t) : [transaction, ...data.transactions] });
     setOpen(false);
@@ -103,7 +97,7 @@ export function Transactions({ data, setData }: { data: FinanceData; setData: (d
   const del = (id: string) =>
     setData({ ...data, transactions: data.transactions.filter(t => t.id !== id) });
 
-  const edit=(t:Transaction)=>{setEditingId(t.id);setType(t.type);setDescription(t.description);setCategoryId(t.categoryId??'');setAutoCategory(false);setPokemonEnabled(Boolean(t.pokemon?.enabled));setPokemonType(t.pokemon?.purchaseType??'single_cards');setOpen(true);};
+  const edit = (t: Transaction) => { setEditingId(t.id); setType(t.type); setDescription(t.description); setCategoryId(t.categoryId ?? ''); setAutoCategory(false); setOpen(true); };
   const closeModal=()=>{setOpen(false);setEditingId(null);setDescription('');setCategoryId('');setAutoCategory(false);setRemember(true);setType('expense')};
   const filtered = useMemo(() => data.transactions
     .filter(t => {
@@ -203,15 +197,6 @@ export function Transactions({ data, setData }: { data: FinanceData; setData: (d
             </>
           )}
 
-          {type!=='transfer'&&<div className="pokemon-fields">
-            <label className="check-line"><input type="checkbox" checked={pokemonEnabled} onChange={e=>setPokemonEnabled(e.target.checked)}/> Dit is een Pokémon-{type==='income'?'verkoop':'aankoop'}</label>
-            {pokemonEnabled&&<div className="pokemon-extra-fields">
-              <label className="field-label">Soort<select value={pokemonType} onChange={e=>setPokemonType(e.target.value as typeof pokemonType)}>
-                <option value="single_cards">Losse kaarten</option><option value="sealed">Sealed producten</option><option value="boosters">Booster packs</option><option value="accessories">Accessoires</option><option value="grading">Grading</option><option value="other">Overig</option>
-              </select></label>
-              <input name="pokemonShop" placeholder="Winkel of verkoper (optioneel)" defaultValue={editingId?data.transactions.find(t=>t.id===editingId)?.pokemon?.shop??'':''}/>
-              <input name="pokemonNote" placeholder="Notitie (optioneel)" defaultValue={editingId?data.transactions.find(t=>t.id===editingId)?.pokemon?.note??'':''}/>
-            </div>}
           </div>}
           <button className="primary" type="submit">{editingId ? 'Wijzigingen opslaan' : 'Opslaan'}</button>
         </form>

@@ -9,9 +9,11 @@ import {
   Tag,
   CalendarClock,
   TrendingUp,
+  Plus,
 } from 'lucide-react';
 import type { FinanceData } from '../types/finance';
 import { accountBalance, euro } from '../utils/finance';
+import { Modal } from '../components/ui/Modal';
 import { dueRecurring, spendable, upcoming, nextIncomeSpendable, projectedBalance, monthCalendar, monthlyEquivalent } from '../utils/planning';
 
 function currentMonthKey() {
@@ -35,6 +37,8 @@ function monthLabel(monthKey: string) {
 
 export function Dashboard({ data, setData }: { data: FinanceData; setData: (data:FinanceData)=>void }) {
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey());
+  const [quickOpen,setQuickOpen]=useState(false);
+  const [quickType,setQuickType]=useState<'expense'|'income'>('expense');
 
   const balances = data.accounts.map(account => ({
     ...account,
@@ -107,14 +111,6 @@ export function Dashboard({ data, setData }: { data: FinanceData; setData: (data
     ? insightMonths.filter(m=>m.income>0).reduce((s,m)=>s+m.income,0)/insightMonths.filter(m=>m.income>0).length:0;
   const savingsRate=avgIncome>0?Math.max(0,(avgIncome-avgExpenses)/avgIncome*100):0;
   const largestExpense=[...data.transactions].filter(t=>t.type==='expense').sort((a,b)=>b.amount-a.amount)[0];
-  const pokemonLabels:Record<string,string>={single_cards:'Losse kaarten',sealed:'Sealed producten',boosters:'Booster packs',accessories:'Accessoires',grading:'Grading',other:'Overig'};
-  const pokemonYear=String(new Date().getFullYear()), pokemonMonthKey=new Date().toISOString().slice(0,7);
-  const pokemonTx=data.transactions.filter(t=>t.pokemon?.enabled);
-  const pokemonY=pokemonTx.filter(t=>t.date.startsWith(pokemonYear));
-  const pokemonPurchasesYear=pokemonY.filter(t=>t.pokemon?.direction==='purchase').reduce((a,t)=>a+t.amount,0);
-  const pokemonSalesYear=pokemonY.filter(t=>t.pokemon?.direction==='sale').reduce((a,t)=>a+t.amount,0);
-  const pokemonMonth=pokemonTx.filter(t=>t.date.startsWith(pokemonMonthKey)&&t.pokemon?.direction==='purchase').reduce((a,t)=>a+t.amount,0);
-  const pokemonByType=Object.entries(pokemonY.filter(t=>t.pokemon?.direction==='purchase').reduce((a,t)=>{const k=t.pokemon?.purchaseType||'other';a[k]=(a[k]||0)+t.amount;return a},{} as Record<string,number>)).sort((a,b)=>b[1]-a[1]);
 
   const forecast = upcoming(data, 45).slice(0, 8);
   const due=dueRecurring(data,31).slice(0,8);
@@ -123,6 +119,23 @@ export function Dashboard({ data, setData }: { data: FinanceData; setData: (data
   const balancePoints = (() => { const now=new Date(); return Array.from({length:6},(_,i)=>{const d=new Date(now.getFullYear(),now.getMonth()-5+i,1);const end=new Date(d.getFullYear(),d.getMonth()+1,0);let value=data.accounts.reduce((sum,a)=>sum+a.startingBalance,0);data.transactions.filter(t=>new Date(t.date+'T12:00:00')<=end).forEach(t=>{if(t.type==='income')value+=t.amount;if(t.type==='expense')value-=t.amount;});return {label:new Intl.DateTimeFormat('nl-NL',{month:'short'}).format(d),value};});})();
   const minBalance=Math.min(...balancePoints.map(p=>p.value)); const maxBalance=Math.max(...balancePoints.map(p=>p.value));
 
+
+  const addQuickTransaction=(e:React.FormEvent<HTMLFormElement>)=>{
+    e.preventDefault();
+    const f=new FormData(e.currentTarget);
+    const categoryId=String(f.get('categoryId')||'');
+    setData({...data,transactions:[{
+      id:crypto.randomUUID(),
+      type:quickType,
+      amount:Number(f.get('amount')),
+      description:String(f.get('description')),
+      date:String(f.get('date')),
+      accountId:String(f.get('accountId')),
+      categoryId:categoryId||undefined,
+    },...data.transactions]});
+    setQuickOpen(false);
+  };
+
   return (
     <>
       <header>
@@ -130,6 +143,23 @@ export function Dashboard({ data, setData }: { data: FinanceData; setData: (data
         <h1>Mijn geld</h1>
         <p className="muted">Je financiële situatie in één oogopslag.</p>
       </header>
+
+      <section className="quick-add-card">
+        <button className="quick-add-button" onClick={()=>{setQuickType('expense');setQuickOpen(true)}}><Plus size={18}/><span><b>Snelle transactie</b><small>Voeg direct een inkomst of uitgave toe</small></span></button>
+      </section>
+
+      <Modal open={quickOpen} title="Snelle transactie" onClose={()=>setQuickOpen(false)}>
+        <form className="form modal-form" onSubmit={addQuickTransaction}>
+          <select value={quickType} onChange={e=>setQuickType(e.target.value as 'expense'|'income')}><option value="expense">Uitgave</option><option value="income">Inkomst</option></select>
+          <input name="description" placeholder="Omschrijving" required autoFocus/>
+          <input name="amount" type="number" min="0.01" step="0.01" placeholder="Bedrag" required/>
+          <label className="field-label date-field">Datum<input name="date" type="date" defaultValue={new Date().toISOString().slice(0,10)} required/></label>
+          <select name="accountId" required>{data.accounts.map(a=><option value={a.id} key={a.id}>{a.name}</option>)}</select>
+          <select name="categoryId" required><option value="">Kies een categorie</option>{data.categories.filter(c=>c.type===quickType).map(c=><option value={c.id} key={c.id}>{c.name}</option>)}</select>
+          <button className="primary">Transactie opslaan</button>
+        </form>
+      </Modal>
+
 
       <section className="hero">
         <span>Totaal saldo</span>
@@ -248,14 +278,6 @@ export function Dashboard({ data, setData }: { data: FinanceData; setData: (data
         <div className="insight-months">{insightMonths.map(m=><div key={m.key}><small>{m.label}</small><i style={{height:`${Math.max(6,Math.min(100,avgExpenses?m.expenses/Math.max(...insightMonths.map(x=>x.expenses),1)*100:6))}%`}}/><span>{euro(m.expenses)}</span></div>)}</div>
       </section>
 
-      <section className="card pokemon-overview">
-        <div className="section-title"><div><h2>Pokémon</h2><p>Uitgaven en verkopen voor je collectie</p></div></div>
-        <div className="pokemon-summary-grid">
-          <span><small>Deze maand</small><b>{euro(pokemonMonth)}</b></span><span><small>Dit jaar gekocht</small><b>{euro(pokemonPurchasesYear)}</b></span>
-          <span><small>Dit jaar verkocht</small><b className="income">{euro(pokemonSalesYear)}</b></span><span><small>Netto uitgegeven</small><b>{euro(pokemonPurchasesYear-pokemonSalesYear)}</b></span>
-        </div>
-        {pokemonByType.length===0?<div className="empty">Markeer transacties als Pokémon-aankoop of -verkoop om hier inzicht te krijgen.</div>:pokemonByType.map(([k,v])=><div className="row" key={k}><div><b>{pokemonLabels[k]||'Overig'}</b><small>Dit jaar</small></div><strong>{euro(v)}</strong></div>)}
-      </section>
 
       <section className="card category-overview">
         <div className="section-title">
