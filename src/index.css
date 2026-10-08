@@ -524,6 +524,7 @@ html[data-theme="dark"] .pokemon-entry{border-color:#2b3531}
 
 @media(max-width:760px){
   .pokemon-summary-grid{grid-template-columns:1fr 1fr}
-  .mobile-nav{overflow-x:auto;justify-content:flex-start}
-  .mobile-nav button{min-width:64px;flex:1 0 64px}
+  .mobile-nav{overflow-x:auto;overflow-y:hidden;justify-content:flex-start;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .mobile-nav::-webkit-scrollbar{display:none}
+  .mobile-nav button{min-width:68px;flex:0 0 68px}
 }
