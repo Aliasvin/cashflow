@@ -26,5 +26,6 @@ export interface PokemonAsset {
   purchasePrice: number;
   purchaseDate: string;
   note?: string;
+  transactionId?: string;
   valueHistory: PokemonValuePoint[];
 }
