@@ -105,17 +105,18 @@ export function Dashboard({ data, setData }: { data: FinanceData; setData: (data
     const exp=tx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
     return {key,label:new Intl.DateTimeFormat('nl-NL',{month:'short'}).format(date),income:inc,expenses:exp,saved:inc-exp};
   });
-  const avgExpenses=insightMonths.reduce((s,m)=>s+m.expenses,0)/insightMonths.length;
-  const avgIncome=insightMonths.reduce((s,m)=>s+m.income,0)/insightMonths.length;
+  const monthsWithExpenses=insightMonths.filter(m=>m.expenses>0);
+  const avgExpenses=monthsWithExpenses.length?monthsWithExpenses.reduce((s,m)=>s+m.expenses,0)/monthsWithExpenses.length:0;
+  const avgIncome=insightMonths.filter(m=>m.income>0).length
+    ? insightMonths.filter(m=>m.income>0).reduce((s,m)=>s+m.income,0)/insightMonths.filter(m=>m.income>0).length:0;
   const savingsRate=avgIncome>0?Math.max(0,(avgIncome-avgExpenses)/avgIncome*100):0;
-  const insightKeys=new Set(insightMonths.map(m=>m.key));
-  const largestExpense=[...data.transactions].filter(t=>t.type==='expense'&&insightKeys.has(t.date.slice(0,7))).sort((a,b)=>b.amount-a.amount)[0];
+  const largestExpense=[...data.transactions].filter(t=>t.type==='expense').sort((a,b)=>b.amount-a.amount)[0];
 
   const forecast = upcoming(data, 45).slice(0, 8);
   const due=dueRecurring(data,31).slice(0,8);
   const processRecurring=(entry:(typeof due)[number])=>{const d=entry.date;const date=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;setData({...data,transactions:[{id:crypto.randomUUID(),type:entry.item.type,amount:entry.item.amount,description:entry.item.description,date,accountId:entry.item.accountId,categoryId:entry.item.categoryId},...data.transactions],processedRecurringOccurrences:[...(data.processedRecurringOccurrences??[]),entry.key]})};
   const skipRecurring=(key:string)=>setData({...data,processedRecurringOccurrences:[...(data.processedRecurringOccurrences??[]),key]});
-  const balancePoints = (() => { const now=new Date();const today=new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59);return Array.from({length:6},(_,i)=>{const d=new Date(now.getFullYear(),now.getMonth()-5+i,1);const monthEnd=new Date(d.getFullYear(),d.getMonth()+1,0,23,59,59);const end=monthEnd>today?today:monthEnd;let value=data.accounts.reduce((sum,a)=>sum+a.startingBalance,0);data.transactions.filter(t=>new Date(t.date+'T12:00:00')<=end).forEach(t=>{if(t.type==='income')value+=t.amount;if(t.type==='expense')value-=t.amount;});return {label:new Intl.DateTimeFormat('nl-NL',{month:'short'}).format(d),value};});})();
+  const balancePoints = (() => { const now=new Date(); return Array.from({length:6},(_,i)=>{const d=new Date(now.getFullYear(),now.getMonth()-5+i,1);const end=new Date(d.getFullYear(),d.getMonth()+1,0);let value=data.accounts.reduce((sum,a)=>sum+a.startingBalance,0);data.transactions.filter(t=>new Date(t.date+'T12:00:00')<=end).forEach(t=>{if(t.type==='income')value+=t.amount;if(t.type==='expense')value-=t.amount;});return {label:new Intl.DateTimeFormat('nl-NL',{month:'short'}).format(d),value};});})();
   const minBalance=Math.min(...balancePoints.map(p=>p.value)); const maxBalance=Math.max(...balancePoints.map(p=>p.value));
 
 
@@ -161,7 +162,7 @@ export function Dashboard({ data, setData }: { data: FinanceData; setData: (data
 
 
       <section className="hero">
-        <span>Totaal saldo</span>
+        <span>Totaal op je rekeningen</span>
         <strong>{euro(total)}</strong>
         <small>Over al je rekeningen</small>
       </section>
@@ -206,7 +207,7 @@ export function Dashboard({ data, setData }: { data: FinanceData; setData: (data
       </div>
 
       <section className="card month-summary">
-        <div className="section-title"><div><h2>Maandoverzicht</h2><p>Vergelijking met {monthLabel(previousMonth)}</p></div></div>
+        <div className="section-title"><div><h2>Deze maand</h2><p>Vergelijking met {monthLabel(previousMonth)}</p></div></div>
         <div className="month-summary-grid"><span>Inkomsten <b>{euro(income)}</b><small>{income-previousIncome>=0?'+ ':''}{euro(income-previousIncome)} t.o.v. vorige maand</small></span><span>Uitgaven <b>{euro(expenses)}</b><small>{expenses-previousExpenses>=0?'+ ':''}{euro(expenses-previousExpenses)} t.o.v. vorige maand</small></span><span>Gespaard <b>{euro(saved)}</b><small>Netto naar spaarrekeningen</small></span><span>Over <b>{euro(income-expenses)}</b><small>Inkomsten min uitgaven</small></span></div>
       </section>
 
@@ -230,7 +231,7 @@ export function Dashboard({ data, setData }: { data: FinanceData; setData: (data
 
       {due.length>0&&<section className="card due-card"><div className="section-title"><div><h2>Te verwerken</h2><p>Verwachte transacties die inmiddels zijn gepland</p></div><CalendarClock size={20}/></div>{due.map(entry=><div className="due-row" key={entry.key}><div><b>{entry.item.description}</b><small>{entry.date.toLocaleDateString('nl-NL')} · {entry.item.type==='income'?'+ ':'- '}{euro(entry.item.amount)}</small></div><div className="due-actions"><button className="primary compact" onClick={()=>processRecurring(entry)}>Toevoegen</button><button className="secondary compact" onClick={()=>skipRecurring(entry.key)}>Overslaan</button></div></div>)}</section>}
 
-      <section className="card"><div className="section-title"><div><h2>Verwachte transacties</h2><p>Komende 45 dagen</p></div><CalendarClock size={20}/></div>{forecast.length===0?<div className="empty">Voeg terugkerende transacties toe om vooruit te kijken.</div>:forecast.map(({item,date})=><div className="row" key={`${item.id}-${date.toISOString()}`}><div><b>{item.description}</b><small>{date.toLocaleDateString('nl-NL',{day:'numeric',month:'short'})}</small></div><strong className={item.type}>{item.type==='income'?'+ ':'- '}{euro(item.amount)}</strong></div>)}</section>
+      <section className="card"><div className="section-title"><div><h2>Verwachte transacties</h2><p>Komende 45 dagen</p></div><CalendarClock size={20}/></div>{forecast.length===0?<div className="empty">Voeg terugkerende transacties toe om vooruit te kijken.</div>:forecast.map(({item,date})=><div className="row" key={item.id}><div><b>{item.description}</b><small>{date.toLocaleDateString('nl-NL',{day:'numeric',month:'short'})}</small></div><strong className={item.type}>{item.type==='income'?'+ ':'- '}{euro(item.amount)}</strong></div>)}</section>
 
 
       <section className="card financial-calendar">
