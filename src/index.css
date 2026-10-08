@@ -528,9 +528,73 @@ html[data-theme="dark"] .pokemon-entry{border-color:#2b3531}
   .mobile-nav button{min-width:64px;flex:1 0 64px}
 }
 
-/* Mobiele hoofdnavigatie: Pokémon zichtbaar, Spaardoelen via Meer */
+/* Mobiel Meer-menu */
 @media(max-width:760px){
-  .mobile-nav{overflow:visible!important;justify-content:space-around!important}
-  .mobile-nav button{min-width:0!important;flex:1 1 0!important}
-  .mobile-nav button span{font-size:10px}
+  .mobile-nav{
+    overflow:visible!important;
+    justify-content:space-around!important;
+  }
+  .mobile-nav>button{
+    min-width:0!important;
+    flex:1 1 0!important;
+  }
+  .mobile-nav>button small{
+    font-size:10px;
+  }
+  .mobile-more-backdrop{
+    position:fixed;
+    inset:0;
+    z-index:68;
+    border:0;
+    background:rgba(0,0,0,.16);
+  }
+  .mobile-more-menu{
+    position:fixed;
+    left:14px;
+    right:14px;
+    bottom:82px;
+    z-index:69;
+    display:grid;
+    gap:4px;
+    padding:8px;
+    border:1px solid #e1e6e3;
+    border-radius:16px;
+    background:#fff;
+    box-shadow:0 14px 40px rgba(20,30,26,.18);
+  }
+  .mobile-more-menu>button{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    width:100%;
+    padding:12px;
+    border:0;
+    border-radius:11px;
+    background:transparent;
+    color:inherit;
+    font:inherit;
+    text-align:left;
+  }
+  .mobile-more-menu>button:active{
+    background:#f2f5f3;
+  }
+  .mobile-more-menu>button>span{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .mobile-more-menu b{
+    font-size:14px;
+  }
+  .mobile-more-menu small{
+    color:#7d8782;
+    font-size:12px;
+  }
+  html[data-theme="dark"] .mobile-more-menu{
+    border-color:#2b3531;
+    background:#18201d;
+  }
+  html[data-theme="dark"] .mobile-more-menu>button:active{
+    background:#222c28;
+  }
 }
