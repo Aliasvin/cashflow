@@ -79,8 +79,11 @@ export function Pokemon({
       categoryId:type==='purchase'?(data.categories.find(c=>c.id==='shopping')?.id??data.categories.find(c=>c.type==='expense')?.id):data.categories.find(c=>c.type==='income')?.id,
     };
     setPokemonTransactions(editing?pokemonTransactions.map(p=>p.id===editing.id?item:p):[item,...pokemonTransactions]);
+    const linkedExists=editing ? data.transactions.some(t=>t.id===editing.linkedTransactionId) : false;
     setData({...data,transactions:editing
-      ? data.transactions.map(t=>t.id===editing.linkedTransactionId?linked:t)
+      ? (linkedExists
+          ? data.transactions.map(t=>t.id===editing.linkedTransactionId?linked:t)
+          : [linked,...data.transactions])
       : [linked,...data.transactions]});
     close();
   };

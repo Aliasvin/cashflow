@@ -197,7 +197,6 @@ export function Transactions({ data, setData }: { data: FinanceData; setData: (d
             </>
           )}
 
-          </div>}
           <button className="primary" type="submit">{editingId ? 'Wijzigingen opslaan' : 'Opslaan'}</button>
         </form>
       </Modal>
