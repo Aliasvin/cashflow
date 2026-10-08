@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { House, ArrowLeftRight, WalletCards, Target, MoreHorizontal, Repeat2, PlayingCards, Settings } from 'lucide-react';
+import { House, ArrowLeftRight, WalletCards, Target, MoreHorizontal, Repeat2, PlayingCardsFan, Settings } from 'lucide-react';
 
 export type Page = 'dashboard' | 'transactions' | 'accounts' | 'recurring' | 'savings' | 'pokemon' | 'settings';
 
