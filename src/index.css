@@ -641,3 +641,11 @@ html[data-theme="dark"] .pokemon-asset,html[data-theme="dark"] .value-history{bo
 .pokemon-linked-items small{color:#7d8782}
 .pokemon-linked-items small.income{color:inherit;font-weight:600}
 .form-hint{margin:-2px 0 4px;color:#7d8782;font-size:12px;line-height:1.45}
+
+/* Duidelijkere actieve pagina in mobiele navigatie */
+@media(max-width:760px){
+ .mobile-nav>button{position:relative;border-radius:14px!important;transition:background-color .18s ease,color .18s ease!important}
+ .mobile-nav>button.active{background:rgba(31,76,61,.11)!important;color:var(--primary,#1f4c3d)!important;font-weight:700!important}
+ .mobile-nav>button.active svg{stroke-width:2.6!important}
+ .mobile-nav>button.active small,.mobile-nav>button.active span{color:inherit!important;font-weight:700!important}
+}
