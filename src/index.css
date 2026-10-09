@@ -642,10 +642,35 @@ html[data-theme="dark"] .pokemon-asset,html[data-theme="dark"] .value-history{bo
 .pokemon-linked-items small.income{color:inherit;font-weight:600}
 .form-hint{margin:-2px 0 4px;color:#7d8782;font-size:12px;line-height:1.45}
 
-/* Duidelijkere actieve pagina in mobiele navigatie */
+/* Mobiele actieve navigatie gelijk aan desktop-sidebar */
 @media(max-width:760px){
- .mobile-nav>button{position:relative;border-radius:14px!important;transition:background-color .18s ease,color .18s ease!important}
- .mobile-nav>button.active{background:rgba(31,76,61,.11)!important;color:var(--primary,#1f4c3d)!important;font-weight:700!important}
- .mobile-nav>button.active svg{stroke-width:2.6!important}
- .mobile-nav>button.active small,.mobile-nav>button.active span{color:inherit!important;font-weight:700!important}
+  .mobile-nav>button{
+    position:relative;
+    border-radius:12px!important;
+    background:transparent!important;
+    transition:background-color .18s ease,color .18s ease!important;
+  }
+
+  .mobile-nav>button.active{
+    background:var(--nav-active-bg, #eaf2ef)!important;
+    color:var(--primary, #174c3b)!important;
+    font-weight:700!important;
+  }
+
+  .mobile-nav>button.active svg{
+    color:inherit!important;
+    stroke-width:2.35!important;
+  }
+
+  .mobile-nav>button.active small,
+  .mobile-nav>button.active span{
+    color:inherit!important;
+    font-weight:700!important;
+  }
+
+  [data-theme="dark"] .mobile-nav>button.active,
+  .dark .mobile-nav>button.active{
+    background:#203a31!important;
+    color:#f1f7f4!important;
+  }
 }
